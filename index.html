@@ -38,7 +38,6 @@
                     <div id="weekly-dashboard-grid" class="space-y-2"></div>
                 </div>
 
-                <!-- Create Routine Configurator -->
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
                     <h3 class="font-bold text-sm uppercase tracking-wider text-indigo-400">Create Weekly Routine</h3>
                     <div class="space-y-3">
@@ -138,9 +137,11 @@
                             <option value="Stretching & Warm-up">Stretching & Warm-up</option>
                         </select>
                         <select id="new-exercise-metric" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none">
-                            <option value="weight_reps">Tracking: Weight & Reps</option>
-                            <option value="time">Tracking: Time Only (Mins/Secs)</option>
-                            <option value="distance_time">Tracking: Distance & Time</option>
+                            <option value="weight_reps">Barbell / Machine (lbs & reps)</option>
+                            <option value="dumbbell_reps">Dumbbells (lbs per hand & reps)</option>
+                            <option value="bodyweight">Bodyweight (reps only)</option>
+                            <option value="time">Time Only (mins & secs)</option>
+                            <option value="distance_time">Distance & Time</option>
                         </select>
                         <button onclick="addNewCustomExercise()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition">
                             Save to Database
@@ -158,12 +159,10 @@
 
             <!-- TAB 4: HISTORY & DATA BACKUP -->
             <div id="tab-history" class="tab-content space-y-4">
-                
                 <div class="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
                     <button onclick="exportDataBackup()" class="py-2 text-xs font-semibold bg-slate-900 border border-slate-700 rounded-lg text-indigo-400 hover:bg-indigo-500/10">💾 Export Backup</button>
                     <button onclick="importDataBackup()" class="py-2 text-xs font-semibold bg-slate-900 border border-slate-700 rounded-lg text-emerald-400 hover:bg-emerald-500/10">📥 Import Data</button>
                 </div>
-
                 <div id="history-empty" class="text-center py-12 text-slate-500 text-sm hidden">
                     No logged workouts found.
                 </div>
@@ -233,26 +232,27 @@
 
         const categoryOptions = ["All", "Legs", "Chest", "Back", "Shoulders", "Arms", "Core", "Cardio & Endurance", "Stretching & Warm-up"];
 
-        // Added specific distance/time routines for dynamic metric testing
+        // BASELINE DATABASE INCLUDES ALL REQUESTED IMAGE EXERCISES WITH CORRECT METRICS
         const standardExercises = [
-            { id: "se-1", name: "Squat (Barbell)", category: "Legs", metric: "weight_reps" },
-            { id: "se-2", name: "Deadlift (Barbell)", category: "Legs", metric: "weight_reps" },
-            { id: "se-4", name: "Bulgarian Split Squat", category: "Legs", metric: "weight_reps" },
-            { id: "se-11", name: "Bench Press (Barbell)", category: "Chest", metric: "weight_reps" },
-            { id: "se-17", name: "Pull-Up", category: "Back", metric: "weight_reps" },
-            { id: "se-24", name: "Overhead Press (Barbell)", category: "Shoulders", metric: "weight_reps" },
-            { id: "se-29", name: "Dumbbell Bicep Curl", category: "Arms", metric: "weight_reps" },
-            { id: "se-32", name: "Tricep Pushdown", category: "Arms", metric: "weight_reps" },
-            { id: "se-35", name: "Plank", category: "Core", metric: "time" },
-            { id: "se-36", name: "Hanging Leg Raise", category: "Core", metric: "weight_reps" },
+            { id: "img-1", name: "Goblet Squat", category: "Legs", metric: "dumbbell_reps" },
+            { id: "img-2", name: "Standing Overhead Press", category: "Shoulders", metric: "weight_reps" },
+            { id: "img-3", name: "Split Squats", category: "Legs", metric: "weight_reps" },
+            { id: "img-4", name: "Biceps Curl", category: "Arms", metric: "dumbbell_reps" },
+            { id: "img-5", name: "One-Arm Rows", category: "Back", metric: "dumbbell_reps" },
+            { id: "img-6", name: "Triceps Extension", category: "Arms", metric: "dumbbell_reps" },
+            { id: "img-7", name: "Wrist Roller", category: "Arms", metric: "weight_reps" },
+            { id: "img-8", name: "Lat Pull-Downs", category: "Back", metric: "weight_reps" },
+            { id: "img-9", name: "Bench Press", category: "Chest", metric: "weight_reps" },
+            { id: "img-10", name: "Leg Extension", category: "Legs", metric: "weight_reps" },
+            { id: "img-11", name: "Leg Curl", category: "Legs", metric: "weight_reps" },
+            { id: "img-12", name: "Swimmers", category: "Stretching & Warm-up", metric: "time" },
+            { id: "img-13", name: "Crunches", category: "Core", metric: "bodyweight" },
             
-            // DYNAMIC METRIC ADDITIONS
-            { id: "se-50", name: "Trail Run", category: "Cardio & Endurance", metric: "distance_time" },
-            { id: "se-51", name: "Long Run", category: "Cardio & Endurance", metric: "distance_time" },
-            { id: "se-52", name: "Ruck March", category: "Cardio & Endurance", metric: "distance_time" },
-            { id: "se-53", name: "Cycling", category: "Cardio & Endurance", metric: "distance_time" },
-            { id: "se-40", name: "Dynamic Warm-up Flow", category: "Stretching & Warm-up", metric: "time" },
-            { id: "se-42", name: "Pigeon Pose Hold", category: "Stretching & Warm-up", metric: "time" }
+            // Standard Fillers
+            { id: "se-2", name: "Deadlift (Barbell)", category: "Legs", metric: "weight_reps" },
+            { id: "se-17", name: "Pull-Up", category: "Back", metric: "bodyweight" },
+            { id: "se-35", name: "Plank", category: "Core", metric: "time" },
+            { id: "se-50", name: "Trail Run", category: "Cardio & Endurance", metric: "distance_time" }
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -261,10 +261,11 @@
             setupTimerLoop();
         });
 
-        function saveToStorage() { localStorage.setItem('workout_app_v4_state', JSON.stringify(appState)); }
+        // BUMPED VERSION TO V5 TO ENSURE NEW EXERCISES LOAD OVER OLD CACHE
+        function saveToStorage() { localStorage.setItem('workout_app_v5_state', JSON.stringify(appState)); }
 
         function loadFromStorage() {
-            const stored = localStorage.getItem('workout_app_v4_state');
+            const stored = localStorage.getItem('workout_app_v5_state');
             if (stored) {
                 appState = JSON.parse(stored);
                 if (!appState.exercises || appState.exercises.length === 0) appState.exercises = [...standardExercises];
@@ -277,12 +278,9 @@
             }
         }
 
-        // DATA BACKUP SHIELD
         function exportDataBackup() {
             const dataStr = JSON.stringify(appState);
-            navigator.clipboard.writeText(dataStr).then(() => {
-                alert("Backup code copied to clipboard! Paste it into an email or notes app to save it.");
-            }).catch(err => alert("Failed to copy."));
+            navigator.clipboard.writeText(dataStr).then(() => alert("Backup code copied to clipboard!")).catch(err => alert("Failed to copy."));
         }
 
         function importDataBackup() {
@@ -291,36 +289,24 @@
                 try {
                     const parsed = JSON.parse(input);
                     if (parsed.exercises && parsed.history) {
-                        appState = parsed;
-                        saveToStorage();
-                        location.reload();
-                    } else { alert("Invalid backup file structure."); }
-                } catch(e) { alert("Error reading backup. Make sure the code is exact."); }
+                        appState = parsed; saveToStorage(); location.reload();
+                    } else alert("Invalid backup structure.");
+                } catch(e) { alert("Error reading backup."); }
             }
         }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${tabId}`).classList.add('active');
-            
-            document.querySelectorAll('nav button').forEach(el => {
-                el.classList.remove('text-indigo-400'); el.classList.add('text-slate-500');
-            });
+            document.querySelectorAll('nav button').forEach(el => { el.classList.remove('text-indigo-400'); el.classList.add('text-slate-500'); });
             document.getElementById(`nav-${tabId}`).classList.remove('text-slate-500');
             document.getElementById(`nav-${tabId}`).classList.add('text-indigo-400');
-
             const titles = { 'today': 'Weekly Schedule', 'workout': 'Track Session', 'exercises': 'App Dictionary', 'history': 'Performance History' };
             document.getElementById('page-title').innerText = titles[tabId];
             renderAllViews();
         }
 
-        function renderAllViews() {
-            renderScheduleDashboard();
-            renderRoutinePickers();
-            renderActiveWorkoutView();
-            renderExerciseDictionary();
-            renderHistoryLogView();
-        }
+        function renderAllViews() { renderScheduleDashboard(); renderRoutinePickers(); renderActiveWorkoutView(); renderExerciseDictionary(); renderHistoryLogView(); }
 
         function isLogFromCurrentWeek(logDateStr) {
             const logDate = new Date(logDateStr);
@@ -328,12 +314,8 @@
             const now = new Date();
             const currentDay = now.getDay(); 
             const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-            const startOfWeek = new Date(now);
-            startOfWeek.setDate(now.getDate() + distanceToMonday);
-            startOfWeek.setHours(0,0,0,0);
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-            endOfWeek.setHours(23,59,59,999);
+            const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() + distanceToMonday); startOfWeek.setHours(0,0,0,0);
+            const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6); endOfWeek.setHours(23,59,59,999);
             return logDate >= startOfWeek && logDate <= endOfWeek;
         }
 
@@ -358,27 +340,20 @@
 
         function getLastPerformanceData(exerciseName) {
             for (let i = appState.history.length - 1; i >= 0; i--) {
-                const completedWorkout = appState.history[i];
-                const foundExercise = completedWorkout.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
-                if (foundExercise && foundExercise.sets && foundExercise.sets.length > 0) return foundExercise.sets;
+                const cw = appState.history[i];
+                const fEx = cw.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
+                if (fEx && fEx.sets && fEx.sets.length > 0) return fEx.sets;
             }
             return null;
         }
 
-        // REST TIMER ENGINE
         function triggerRestTimer() {
             document.getElementById('rest-timer-panel').classList.remove('translate-y-[150%]');
-            restTimeRemaining = 90; // Default 90 seconds
-            updateRestTimerUI();
-            
+            restTimeRemaining = 90; updateRestTimerUI();
             if(restTimerInterval) clearInterval(restTimerInterval);
             restTimerInterval = setInterval(() => {
-                restTimeRemaining--;
-                updateRestTimerUI();
-                if (restTimeRemaining <= 0) {
-                    dismissRestTimer();
-                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                }
+                restTimeRemaining--; updateRestTimerUI();
+                if (restTimeRemaining <= 0) { dismissRestTimer(); if(navigator.vibrate) navigator.vibrate([200, 100, 200]); }
             }, 1000);
         }
 
@@ -387,48 +362,26 @@
             const secs = String(restTimeRemaining % 60).padStart(2, '0');
             document.getElementById('rest-time-display').innerText = `${mins}:${secs} remaining`;
         }
+        function addRestTime(seconds) { restTimeRemaining += seconds; updateRestTimerUI(); }
+        function dismissRestTimer() { if(restTimerInterval) clearInterval(restTimerInterval); document.getElementById('rest-timer-panel').classList.add('translate-y-[150%]'); }
 
-        function addRestTime(seconds) {
-            restTimeRemaining += seconds;
-            updateRestTimerUI();
-        }
-
-        function dismissRestTimer() {
-            if(restTimerInterval) clearInterval(restTimerInterval);
-            document.getElementById('rest-timer-panel').classList.add('translate-y-[150%]');
-        }
-
-        // TAB 1
+        // PLANNER & ROUTINES
         function renderScheduleDashboard() {
-            const grid = document.getElementById('weekly-dashboard-grid');
-            grid.innerHTML = '';
-            const daysMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const currentDayStr = daysMap[new Date().getDay()];
+            const grid = document.getElementById('weekly-dashboard-grid'); grid.innerHTML = '';
+            const daysMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]; const currentDayStr = daysMap[new Date().getDay()];
 
             ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(day => {
                 const targetRoutineId = appState.schedule[day];
                 const foundRoutine = appState.routines.find(r => r.id === targetRoutineId);
                 const isToday = (day === currentDayStr);
-
-                let isFinishedThisWeek = false;
-                if (foundRoutine) {
-                    isFinishedThisWeek = appState.history.some(log => log.originatingDay === day && log.routineTemplateId === targetRoutineId && isLogFromCurrentWeek(log.date));
-                }
+                let isFinishedThisWeek = foundRoutine ? appState.history.some(log => log.originatingDay === day && log.routineTemplateId === targetRoutineId && isLogFromCurrentWeek(log.date)) : false;
 
                 const block = document.createElement('div');
                 block.className = `p-3 rounded-xl border flex items-center justify-between text-sm ${isToday ? 'bg-indigo-950/20 border-indigo-500/40 shadow-sm' : 'bg-slate-950 border-slate-800'} ${isFinishedThisWeek ? 'opacity-75 border-emerald-500/30 bg-emerald-950/5' : ''}`;
                 
-                let innerDetails = `<p class="text-slate-500 italic text-xs">Rest / Unscheduled</p>`;
-                let actionBtn = '';
-
+                let innerDetails = `<p class="text-slate-500 italic text-xs">Rest / Unscheduled</p>`; let actionBtn = '';
                 if (foundRoutine) {
-                    innerDetails = `
-                        <div class="flex items-center space-x-2">
-                            <p class="font-bold text-white text-sm">${foundRoutine.name}</p>
-                            ${isFinishedThisWeek ? '<span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.2 rounded-full font-bold border border-emerald-500/30">✓ Finished</span>' : ''}
-                        </div>
-                        <p class="text-[10px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px]">${foundRoutine.exercises.join(', ')}</p>
-                    `;
+                    innerDetails = `<div class="flex items-center space-x-2"><p class="font-bold text-white text-sm">${foundRoutine.name}</p>${isFinishedThisWeek ? '<span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.2 rounded-full font-bold border border-emerald-500/30">✓ Finished</span>' : ''}</div><p class="text-[10px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px]">${foundRoutine.exercises.join(', ')}</p>`;
                     actionBtn = `<button onclick="startWorkoutEngine('${foundRoutine.name}', ${JSON.stringify(foundRoutine.exercises).replace(/"/g, '&quot;')}, '${day}', '${foundRoutine.id}')" class="text-white font-bold text-xs px-3 py-1.5 rounded-lg transition ${isFinishedThisWeek ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-500'}">${isFinishedThisWeek ? 'Redo' : 'Start'}</button>`;
                 }
                 block.innerHTML = `<div class="flex items-center space-x-3 flex-1 min-w-0"><span class="w-10 font-bold ${isToday ? 'text-indigo-400' : 'text-slate-400'} text-xs uppercase">${day}${isToday ? ' 📍' : ''}</span><div class="flex-1 min-w-0">${innerDetails}</div></div><div>${actionBtn}</div>`;
@@ -437,57 +390,33 @@
         }
 
         function renderRoutinePickers() {
-            const listPicker = document.getElementById('routine-exercise-picker');
-            listPicker.innerHTML = '';
+            const listPicker = document.getElementById('routine-exercise-picker'); listPicker.innerHTML = '';
             [...appState.exercises].sort((a,b) => a.name.localeCompare(b.name)).forEach(ex => {
-                const lbl = document.createElement('label');
-                lbl.className = "flex items-center space-x-2 py-1 border-b border-slate-800 last:border-0";
+                const lbl = document.createElement('label'); lbl.className = "flex items-center space-x-2 py-1 border-b border-slate-800 last:border-0";
                 lbl.innerHTML = `<input type="checkbox" value="${ex.name}" class="routine-ex-checkbox"> <span class="text-slate-300">${ex.name}</span>`;
                 listPicker.appendChild(lbl);
             });
 
-            const blueprintsContainer = document.getElementById('created-routines-list');
-            blueprintsContainer.innerHTML = '';
-            
-            if (appState.routines.length === 0) {
-                blueprintsContainer.innerHTML = `<p class="text-xs text-slate-600 italic">No templates defined.</p>`;
-                return;
-            }
+            const blueprintsContainer = document.getElementById('created-routines-list'); blueprintsContainer.innerHTML = '';
+            if (appState.routines.length === 0) { blueprintsContainer.innerHTML = `<p class="text-xs text-slate-600 italic">No templates defined.</p>`; return; }
 
             appState.routines.forEach(rt => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-950 p-3 rounded-lg border border-slate-800 flex justify-between items-center text-sm";
-                let assignedDays = [];
-                Object.keys(appState.schedule).forEach(day => { if (appState.schedule[day] === rt.id) assignedDays.push(day); });
-                
-                card.innerHTML = `
-                    <div>
-                        <p class="font-bold text-slate-200">${rt.name}</p>
-                        <p class="text-[10px] text-indigo-400 font-medium">${rt.exercises.length} Movements • Recurring: ${assignedDays.length > 0 ? assignedDays.join(', ') : 'Unscheduled'}</p>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button onclick="startWorkoutEngine('${rt.name}', ${JSON.stringify(rt.exercises).replace(/"/g, '&quot;')}, '', '${rt.id}')" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold px-2.5 py-1 rounded-md">Track</button>
-                        <button onclick="deleteRoutineTemplate('${rt.id}')" class="text-xs text-slate-600 hover:text-rose-500 px-1">✕</button>
-                    </div>
-                `;
+                const card = document.createElement('div'); card.className = "bg-slate-950 p-3 rounded-lg border border-slate-800 flex justify-between items-center text-sm";
+                let assignedDays = []; Object.keys(appState.schedule).forEach(day => { if (appState.schedule[day] === rt.id) assignedDays.push(day); });
+                card.innerHTML = `<div><p class="font-bold text-slate-200">${rt.name}</p><p class="text-[10px] text-indigo-400 font-medium">${rt.exercises.length} Movements • Recurring: ${assignedDays.length > 0 ? assignedDays.join(', ') : 'Unscheduled'}</p></div><div class="flex space-x-2"><button onclick="startWorkoutEngine('${rt.name}', ${JSON.stringify(rt.exercises).replace(/"/g, '&quot;')}, '', '${rt.id}')" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold px-2.5 py-1 rounded-md">Track</button><button onclick="deleteRoutineTemplate('${rt.id}')" class="text-xs text-slate-600 hover:text-rose-500 px-1">✕</button></div>`;
                 blueprintsContainer.appendChild(card);
             });
         }
 
         function saveCustomRoutine() {
-            const nameInput = document.getElementById('routine-name-input');
-            const name = nameInput.value.trim();
+            const name = document.getElementById('routine-name-input').value.trim();
             if (!name) return alert("Provide a routine blueprint name.");
-
-            const selectedExs = [];
-            document.querySelectorAll('.routine-ex-checkbox:checked').forEach(cb => selectedExs.push(cb.value));
+            const selectedExs = []; document.querySelectorAll('.routine-ex-checkbox:checked').forEach(cb => selectedExs.push(cb.value));
             if (selectedExs.length === 0) return alert("Select at least one movement.");
 
-            const routineId = "rt-" + Date.now();
-            appState.routines.push({ id: routineId, name: name, exercises: selectedExs });
+            const routineId = "rt-" + Date.now(); appState.routines.push({ id: routineId, name: name, exercises: selectedExs });
             document.querySelectorAll('.day-checkbox:checked').forEach(cb => appState.schedule[cb.value] = routineId);
-
-            nameInput.value = '';
+            document.getElementById('routine-name-input').value = '';
             document.querySelectorAll('.day-checkbox:checked, .routine-ex-checkbox:checked').forEach(cb => cb.checked = false);
             saveToStorage(); renderAllViews();
         }
@@ -500,213 +429,183 @@
             }
         }
 
-        // DYNAMIC WORKOUT ENGINE
+        // WORKOUT ENGINE
         function startWorkoutEngine(title, exerciseNameArray, originatingDay = "", routineTemplateId = "") {
-            appState.activeWorkout = {
-                name: title, startTime: Date.now(), warmupMinutes: 0,
-                originatingDay: originatingDay, routineTemplateId: routineTemplateId, exercises: []
-            };
-
+            appState.activeWorkout = { name: title, startTime: Date.now(), warmupMinutes: 0, originatingDay: originatingDay, routineTemplateId: routineTemplateId, exercises: [] };
             exerciseNameArray.forEach(name => {
                 const dictEntry = appState.exercises.find(e => e.name === name) || { metric: 'weight_reps' };
-                const pastSets = getLastPerformanceData(name);
-                let blueprint = [];
-                
-                if (pastSets) {
-                    pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
-                } else {
-                    blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
-                }
+                const pastSets = getLastPerformanceData(name); let blueprint = [];
+                if (pastSets) pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
+                else blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
                 appState.activeWorkout.exercises.push({ name: name, supersetGroup: "", metric: dictEntry.metric, sets: blueprint });
             });
-
-            document.getElementById('active-workout-name').value = title;
-            document.getElementById('warmup-display').innerText = "0 mins";
+            document.getElementById('active-workout-name').value = title; document.getElementById('warmup-display').innerText = "0 mins";
             saveToStorage(); switchTab('workout');
         }
 
+        // VISUAL LINKING & METRIC RENDERER
         function renderActiveWorkoutView() {
-            const noActiveView = document.getElementById('no-active-workout');
-            const activeContainer = document.getElementById('active-workout-container');
+            const noActiveView = document.getElementById('no-active-workout'); const activeContainer = document.getElementById('active-workout-container');
             const listContainer = document.getElementById('active-exercises-list');
 
-            if (!appState.activeWorkout) {
-                noActiveView.classList.remove('hidden'); activeContainer.classList.add('hidden');
-                document.getElementById('active-workout-indicator').classList.add('hidden'); return;
-            }
+            if (!appState.activeWorkout) { noActiveView.classList.remove('hidden'); activeContainer.classList.add('hidden'); document.getElementById('active-workout-indicator').classList.add('hidden'); return; }
+            noActiveView.classList.add('hidden'); activeContainer.classList.remove('hidden'); document.getElementById('active-workout-indicator').classList.remove('hidden'); listContainer.innerHTML = '';
 
-            noActiveView.classList.add('hidden'); activeContainer.classList.remove('hidden');
-            document.getElementById('active-workout-indicator').classList.remove('hidden');
-            listContainer.innerHTML = '';
+            // Group processing for SuperSets/Circuits Linking
+            const groupedExercises = [];
+            appState.activeWorkout.exercises.forEach((ex, idx) => {
+                ex._originalIndex = idx; 
+                if (ex.supersetGroup && groupedExercises.length > 0 && groupedExercises[groupedExercises.length - 1][0].supersetGroup === ex.supersetGroup) {
+                    groupedExercises[groupedExercises.length - 1].push(ex); return;
+                }
+                groupedExercises.push([ex]);
+            });
 
-            appState.activeWorkout.exercises.forEach((activeEx, exIndex) => {
-                const block = document.createElement('div');
-                let groupBorderColor = "border-slate-800"; let groupLabelHtml = "";
-                if (activeEx.supersetGroup === "A") { groupBorderColor = "border-amber-500"; groupLabelHtml = "<span class='text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-bold uppercase'>Superset A</span>"; }
-                if (activeEx.supersetGroup === "B") { groupBorderColor = "border-cyan-500"; groupLabelHtml = "<span class='text-[10px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.2 rounded font-bold uppercase'>Superset B</span>"; }
-                if (activeEx.supersetGroup === "C") { groupBorderColor = "border-fuchsia-500"; groupLabelHtml = "<span class='text-[10px] bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 px-1.5 py-0.2 rounded font-bold uppercase'>Circuit C</span>"; }
-                block.className = `bg-slate-950 p-3 rounded-xl border ${groupBorderColor} space-y-2 transition-all`;
-                
-                const pastSets = getLastPerformanceData(activeEx.name);
+            groupedExercises.forEach(group => {
+                const isInGroup = group[0].supersetGroup !== "";
+                let groupBorder = "border-slate-800";
+                if (group[0].supersetGroup === "A") groupBorder = "border-amber-500 border-l-4";
+                if (group[0].supersetGroup === "B") groupBorder = "border-cyan-500 border-l-4";
+                if (group[0].supersetGroup === "C") groupBorder = "border-fuchsia-500 border-l-4";
 
-                // Determine Dynamic Metric Labels
-                let label1 = "lbs"; let label2 = "reps";
-                if(activeEx.metric === "time") { label1 = "mins"; label2 = "secs"; }
-                if(activeEx.metric === "distance_time") { label1 = "miles"; label2 = "mins"; }
+                const groupContainer = document.createElement('div');
+                groupContainer.className = `bg-slate-950 rounded-xl border ${groupBorder} overflow-hidden shadow-sm`;
 
-                let setsHtml = '';
-                activeEx.sets.forEach((set, setIndex) => {
-                    const past1 = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].v1 : '';
-                    const past2 = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].v2 : '';
-                    const checkedStateClass = set.isDone ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-400' : 'bg-slate-900 border-slate-700 text-slate-400';
+                group.forEach((activeEx, groupIndex) => {
+                    const exIndex = activeEx._originalIndex;
+                    const pastSets = getLastPerformanceData(activeEx.name);
 
-                    setsHtml += `
-                    <div class="grid grid-cols-12 gap-1.5 items-center text-sm p-1 rounded-lg transition-colors ${set.isDone ? 'bg-emerald-950/20' : ''}">
-                        <button onclick="toggleSetCheckmark(${exIndex}, ${setIndex})" class="col-span-2 py-1 text-center font-bold text-xs rounded border transition ${set.isDone ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'}">
-                            ${set.isDone ? '✓' : `S${setIndex + 1}`}
-                        </button>
-                        <div class="col-span-4 flex items-center rounded border px-1.5 ${checkedStateClass}">
-                            <input type="number" step="any" placeholder="${past1 || '0'}" value="${set.v1}" oninput="updateSetData(${exIndex}, ${setIndex}, 'v1', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none text-xs font-semibold">
-                            <span class="text-[9px] text-slate-500 ml-0.5">${label1}</span>
+                    // Dynamic Metrics Handling
+                    let label1 = "lbs"; let label2 = "reps"; let isBodyweight = false;
+                    if(activeEx.metric === "time") { label1 = "mins"; label2 = "secs"; }
+                    else if(activeEx.metric === "distance_time") { label1 = "miles"; label2 = "mins"; }
+                    else if(activeEx.metric === "dumbbell_reps") { label1 = "lbs/hand"; label2 = "reps"; }
+                    else if(activeEx.metric === "bodyweight") { isBodyweight = true; label2 = "reps"; }
+
+                    let setsHtml = '';
+                    activeEx.sets.forEach((set, setIndex) => {
+                        const past1 = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].v1 : '';
+                        const past2 = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].v2 : '';
+                        const checkedStateClass = set.isDone ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-400' : 'bg-slate-900 border-slate-700 text-slate-400';
+
+                        let input1Html = isBodyweight ? `<div class="col-span-4 flex items-center justify-center text-xs text-slate-600 bg-slate-900/30 rounded border border-slate-800 font-bold uppercase tracking-wide">Bodyweight</div>` : `
+                            <div class="col-span-4 flex items-center rounded border px-1.5 ${checkedStateClass}">
+                                <input type="number" step="any" placeholder="${past1 || '0'}" value="${set.v1}" oninput="updateSetData(${exIndex}, ${setIndex}, 'v1', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none text-xs font-semibold">
+                                <span class="text-[9px] text-slate-500 ml-0.5 whitespace-nowrap">${label1}</span>
+                            </div>`;
+
+                        setsHtml += `
+                        <div class="grid grid-cols-12 gap-1.5 items-center text-sm p-1 rounded-lg transition-colors ${set.isDone ? 'bg-emerald-950/20' : ''}">
+                            <button onclick="toggleSetCheckmark(${exIndex}, ${setIndex})" class="col-span-2 py-1 text-center font-bold text-xs rounded border transition ${set.isDone ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'}">
+                                ${set.isDone ? '✓' : `S${setIndex + 1}`}
+                            </button>
+                            ${input1Html}
+                            <div class="col-span-4 flex items-center rounded border px-1.5 ${checkedStateClass}">
+                                <input type="number" placeholder="${past2 || '0'}" value="${set.v2}" oninput="updateSetData(${exIndex}, ${setIndex}, 'v2', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none text-xs font-semibold">
+                                <span class="text-[9px] text-slate-500 ml-0.5">${label2}</span>
+                            </div>
+                            <button onclick="removeSetFromActive(${exIndex}, ${setIndex})" class="col-span-2 text-slate-600 hover:text-rose-500 text-center text-xs">✕</button>
+                        </div>`;
+                    });
+
+                    let groupLabelHtml = "";
+                    if (activeEx.supersetGroup === "A") groupLabelHtml = "<span class='text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.2 rounded font-bold uppercase'>Link A</span>";
+                    if (activeEx.supersetGroup === "B") groupLabelHtml = "<span class='text-[10px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.2 rounded font-bold uppercase'>Link B</span>";
+                    if (activeEx.supersetGroup === "C") groupLabelHtml = "<span class='text-[10px] bg-fuchsia-500/20 text-fuchsia-400 px-1.5 py-0.2 rounded font-bold uppercase'>Link C</span>";
+
+                    const borderBottom = groupIndex < group.length - 1 ? 'border-b border-slate-900/50' : '';
+                    const exDiv = document.createElement('div');
+                    exDiv.className = `p-3 space-y-2 transition-all ${borderBottom}`;
+                    
+                    let pastLabelText = isBodyweight ? `✨ Match: S1 (${pastSets?.[0]?.v2} ${label2})` : `✨ Match: S1 (${pastSets?.[0]?.v1} ${label1} x ${pastSets?.[0]?.v2} ${label2})`;
+
+                    exDiv.innerHTML = `
+                        <div class="flex justify-between items-start border-b border-slate-800 pb-2 mb-1">
+                            <div>
+                                <div class="flex items-center space-x-2 flex-wrap gap-y-1"><h4 class="font-bold text-white text-sm leading-tight">${activeEx.name}</h4>${groupLabelHtml}</div>
+                                ${pastSets ? `<span class="text-[9px] text-emerald-400 block mt-0.5">${pastLabelText}</span>` : '<span class="text-[9px] text-slate-500 block mt-0.5">No metrics history</span>'}
+                            </div>
+                            <select onchange="updateExerciseGroup(${exIndex}, this.value)" class="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 rounded px-1 py-0.5 focus:outline-none">
+                                <option value="" ${activeEx.supersetGroup===''?'selected':''}>Link Group</option>
+                                <option value="A" ${activeEx.supersetGroup==='A'?'selected':''}>Superset A</option>
+                                <option value="B" ${activeEx.supersetGroup==='B'?'selected':''}>Superset B</option>
+                                <option value="C" ${activeEx.supersetGroup==='C'?'selected':''}>Circuit C</option>
+                            </select>
                         </div>
-                        <div class="col-span-4 flex items-center rounded border px-1.5 ${checkedStateClass}">
-                            <input type="number" placeholder="${past2 || '0'}" value="${set.v2}" oninput="updateSetData(${exIndex}, ${setIndex}, 'v2', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none text-xs font-semibold">
-                            <span class="text-[9px] text-slate-500 ml-0.5">${label2}</span>
+                        <div class="space-y-1">${setsHtml}</div>
+                        <div class="flex justify-between items-center pt-1">
+                            <button onclick="addSetToActive(${exIndex})" class="text-[10px] text-indigo-400 hover:underline">➕ Add Set Row</button>
+                            <button onclick="removeExerciseFromActive(${exIndex})" class="text-[10px] text-slate-500 hover:text-rose-400">Remove Exercise</button>
                         </div>
-                        <button onclick="removeSetFromActive(${exIndex}, ${setIndex})" class="col-span-2 text-slate-600 hover:text-rose-500 text-center text-xs">✕</button>
-                    </div>`;
+                    `;
+                    groupContainer.appendChild(exDiv);
                 });
-
-                block.innerHTML = `
-                    <div class="flex justify-between items-start border-b border-slate-800 pb-2 mb-1">
-                        <div>
-                            <div class="flex items-center space-x-2 flex-wrap gap-y-1"><h4 class="font-bold text-white text-sm leading-tight">${activeEx.name}</h4>${groupLabelHtml}</div>
-                            ${pastSets ? `<span class="text-[9px] text-emerald-400 block mt-0.5">✨ Last load: S1 (${pastSets[0].v1} ${label1} x ${pastSets[0].v2} ${label2})</span>` : '<span class="text-[9px] text-slate-500 block mt-0.5">No metrics history</span>'}
-                        </div>
-                        <select onchange="updateExerciseGroup(${exIndex}, this.value)" class="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 rounded px-1 py-0.5 focus:outline-none">
-                            <option value="" ${activeEx.supersetGroup===''?'selected':''}>Link Group</option>
-                            <option value="A" ${activeEx.supersetGroup==='A'?'selected':''}>Superset A</option>
-                            <option value="B" ${activeEx.supersetGroup==='B'?'selected':''}>Superset B</option>
-                            <option value="C" ${activeEx.supersetGroup==='C'?'selected':''}>Circuit C</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1">${setsHtml}</div>
-                    <div class="flex justify-between items-center pt-1">
-                        <button onclick="addSetToActive(${exIndex})" class="text-[10px] text-indigo-400 hover:underline">➕ Add Set Row</button>
-                        <button onclick="removeExerciseFromActive(${exIndex})" class="text-[10px] text-slate-500 hover:text-rose-400">Remove Exercise</button>
-                    </div>
-                `;
-                listContainer.appendChild(block);
+                listContainer.appendChild(groupContainer);
             });
         }
 
-        function updateSetData(exIndex, setIndex, field, value) {
-            appState.activeWorkout.exercises[exIndex].sets[setIndex][field] = value;
-            saveToStorage();
-        }
-
+        function updateSetData(exIndex, setIndex, field, value) { appState.activeWorkout.exercises[exIndex].sets[setIndex][field] = value; saveToStorage(); }
         function toggleSetCheckmark(exIndex, setIndex) {
             const current = appState.activeWorkout.exercises[exIndex].sets[setIndex].isDone;
             appState.activeWorkout.exercises[exIndex].sets[setIndex].isDone = !current;
-            saveToStorage();
-            renderActiveWorkoutView();
-            // Start rest timer only if checking OFF a set (completed)
+            saveToStorage(); renderActiveWorkoutView();
             if(!current) triggerRestTimer();
         }
-
-        function updateExerciseGroup(exIndex, groupValue) {
-            appState.activeWorkout.exercises[exIndex].supersetGroup = groupValue;
-            saveToStorage(); renderActiveWorkoutView();
-        }
-
-        function addSetToActive(exIndex) {
-            appState.activeWorkout.exercises[exIndex].sets.push({ v1: "", v2: "", isDone: false });
-            saveToStorage(); renderActiveWorkoutView();
-        }
-
-        function removeSetFromActive(exIndex, setIndex) {
-            appState.activeWorkout.exercises[exIndex].sets.splice(setIndex, 1);
-            saveToStorage(); renderActiveWorkoutView();
-        }
-
-        function removeExerciseFromActive(exIndex) {
-            appState.activeWorkout.exercises.splice(exIndex, 1);
-            saveToStorage(); renderActiveWorkoutView();
-        }
+        function updateExerciseGroup(exIndex, groupValue) { appState.activeWorkout.exercises[exIndex].supersetGroup = groupValue; saveToStorage(); renderActiveWorkoutView(); }
+        function addSetToActive(exIndex) { appState.activeWorkout.exercises[exIndex].sets.push({ v1: "", v2: "", isDone: false }); saveToStorage(); renderActiveWorkoutView(); }
+        function removeSetFromActive(exIndex, setIndex) { appState.activeWorkout.exercises[exIndex].sets.splice(setIndex, 1); saveToStorage(); renderActiveWorkoutView(); }
+        function removeExerciseFromActive(exIndex) { appState.activeWorkout.exercises.splice(exIndex, 1); saveToStorage(); renderActiveWorkoutView(); }
 
         function addExerciseToActive(exerciseName) {
             const dictEntry = appState.exercises.find(e => e.name === exerciseName) || { metric: 'weight_reps' };
-            const pastSets = getLastPerformanceData(exerciseName);
-            let blueprint = [];
-            if (pastSets) {
-                pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
-            } else {
-                blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
-            }
+            const pastSets = getLastPerformanceData(exerciseName); let blueprint = [];
+            if (pastSets) pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
+            else blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
             appState.activeWorkout.exercises.push({ name: exerciseName, supersetGroup: "", metric: dictEntry.metric, sets: blueprint });
             saveToStorage(); closeAddExerciseModal(); renderActiveWorkoutView();
         }
 
+        // SAVE & ZERO REJECTION RULES
         function finishActiveWorkout() {
             if (!appState.activeWorkout || appState.activeWorkout.exercises.length === 0) return alert("Add at least one exercise before completing.");
-
             const cleanLoggedExercises = [];
+            
             appState.activeWorkout.exercises.forEach(ex => {
-                const filledSets = [];
-                const pastSets = getLastPerformanceData(ex.name);
-
+                const filledSets = []; const pastSets = getLastPerformanceData(ex.name);
                 ex.sets.forEach((set, idx) => {
                     let v1 = set.v1; let v2 = set.v2;
-                    if (v1 === "" && pastSets && pastSets[idx]) v1 = pastSets[idx].v1;
+                    if (ex.metric !== "bodyweight" && v1 === "" && pastSets && pastSets[idx]) v1 = pastSets[idx].v1;
                     if (v2 === "" && pastSets && pastSets[idx]) v2 = pastSets[idx].v2;
-
+                    
                     const p1 = parseFloat(v1); const p2 = parseFloat(v2);
-                    // Strict zero stripping logic persists
-                    if (!isNaN(p1) && !isNaN(p2) && (p1 > 0 || p2 > 0)) {
-                        filledSets.push({ v1: p1, v2: p2 });
+                    
+                    if (ex.metric === "bodyweight") {
+                        if (!isNaN(p2) && p2 > 0) filledSets.push({ v1: 0, v2: p2 });
+                    } else {
+                        if (!isNaN(p1) && !isNaN(p2) && (p1 > 0 || p2 > 0)) filledSets.push({ v1: p1, v2: p2 });
                     }
                 });
                 if (filledSets.length > 0) cleanLoggedExercises.push({ name: ex.name, metric: ex.metric, sets: filledSets, supersetGroup: ex.supersetGroup });
             });
 
-            if (cleanLoggedExercises.length === 0 && appState.activeWorkout.warmupMinutes === 0) {
-                return alert("No performance rows or warm-ups recorded. Use 'Discard' to wipe entirely.");
-            }
+            if (cleanLoggedExercises.length === 0 && appState.activeWorkout.warmupMinutes === 0) return alert("No performance rows or warm-ups recorded. Use 'Discard' to wipe entirely.");
 
             appState.history.push({
-                id: "log-" + Date.now(),
-                name: document.getElementById('active-workout-name').value || "Completed Workout",
+                id: "log-" + Date.now(), name: document.getElementById('active-workout-name').value || "Completed Workout",
                 date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
                 durationMins: Math.floor((Date.now() - appState.activeWorkout.startTime) / 60000),
-                warmupMinutes: appState.activeWorkout.warmupMinutes,
-                originatingDay: appState.activeWorkout.originatingDay,
-                routineTemplateId: appState.activeWorkout.routineTemplateId,
-                exercises: cleanLoggedExercises
+                warmupMinutes: appState.activeWorkout.warmupMinutes, originatingDay: appState.activeWorkout.originatingDay,
+                routineTemplateId: appState.activeWorkout.routineTemplateId, exercises: cleanLoggedExercises
             });
-
-            appState.activeWorkout = null;
-            saveToStorage(); switchTab('history');
+            appState.activeWorkout = null; saveToStorage(); switchTab('history');
         }
 
-        function cancelActiveWorkout() {
-            if (confirm("Discard session? All parameters will clear.")) {
-                appState.activeWorkout = null; saveToStorage(); renderActiveWorkoutView();
-            }
-        }
+        function cancelActiveWorkout() { if (confirm("Discard session? All parameters will clear.")) { appState.activeWorkout = null; saveToStorage(); renderActiveWorkoutView(); } }
 
-        // TAB 3 DICTIONARY
-        function changeDictionaryFilter(cat) {
-            currentDictCategory = cat;
-            renderCategoryPills('dictionary-filter-pills', currentDictCategory, 'changeDictionaryFilter');
-            renderExerciseDictionary();
-        }
-
-        function changeModalFilter(cat) {
-            currentModalCategory = cat;
-            renderCategoryPills('modal-filter-pills', currentModalCategory, 'changeModalFilter');
-            renderModalExercises();
-        }
-
+        // DICTIONARY TAB
+        function changeDictionaryFilter(cat) { currentDictCategory = cat; renderCategoryPills('dictionary-filter-pills', currentDictCategory, 'changeDictionaryFilter'); renderExerciseDictionary(); }
+        function changeModalFilter(cat) { currentModalCategory = cat; renderCategoryPills('modal-filter-pills', currentModalCategory, 'changeModalFilter'); renderModalExercises(); }
+        
         function renderCategoryPills(containerId, activeCat, functionName) {
             const container = document.getElementById(containerId); container.innerHTML = '';
             categoryOptions.forEach(cat => {
@@ -719,10 +618,7 @@
 
         function renderExerciseDictionary() {
             if (!document.getElementById('dictionary-filter-pills').children.length) renderCategoryPills('dictionary-filter-pills', currentDictCategory, 'changeDictionaryFilter');
-            const container = document.getElementById('dictionary-list');
-            const searchVal = document.getElementById('exercise-search').value.toLowerCase();
-            container.innerHTML = '';
-
+            const container = document.getElementById('dictionary-list'); const searchVal = document.getElementById('exercise-search').value.toLowerCase(); container.innerHTML = '';
             let filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(searchVal));
             if (currentDictCategory !== "All") filtered = filtered.filter(e => e.category === currentDictCategory);
 
@@ -730,13 +626,9 @@
             if (filtered.length === 0) { container.innerHTML = `<p class="text-center py-6 text-xs text-slate-500">No exercise rows match.</p>`; return; }
 
             categories.forEach(cat => {
-                const catBlock = document.createElement('div');
-                catBlock.className = "space-y-1.5";
-                catBlock.innerHTML = `<h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 pl-1">${cat}</h4>`;
-                
+                const catBlock = document.createElement('div'); catBlock.className = "space-y-1.5"; catBlock.innerHTML = `<h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 pl-1">${cat}</h4>`;
                 filtered.filter(e => e.category === cat).sort((a,b)=>a.name.localeCompare(b.name)).forEach(e => {
-                    const el = document.createElement('div');
-                    el.className = "flex justify-between items-center bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 text-sm";
+                    const el = document.createElement('div'); el.className = "flex justify-between items-center bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 text-sm";
                     el.innerHTML = `<span class="font-medium text-slate-300 text-xs">${e.name}</span><button onclick="quickStartExercise('${e.name}')" class="text-xs text-indigo-400 bg-indigo-500/5 px-2.5 py-1 rounded-lg border border-indigo-500/10 font-medium">Track</button>`;
                     catBlock.appendChild(el);
                 });
@@ -745,100 +637,60 @@
         }
 
         function addNewCustomExercise() {
-            const name = document.getElementById('new-exercise-name').value.trim();
-            const cat = document.getElementById('new-exercise-category').value;
-            const metric = document.getElementById('new-exercise-metric').value;
-
+            const name = document.getElementById('new-exercise-name').value.trim(); const cat = document.getElementById('new-exercise-category').value; const metric = document.getElementById('new-exercise-metric').value;
             if (!name) return alert("Enter a workout name configuration.");
             if (appState.exercises.some(e => e.name.toLowerCase() === name.toLowerCase())) return alert("Name conflict row already exists.");
-
-            appState.exercises.push({ id: "custom-" + Date.now(), name: name, category: cat, metric: metric });
-            saveToStorage();
-            
-            document.getElementById('new-exercise-name').value = '';
-            renderExerciseDictionary(); renderRoutinePickers();
+            appState.exercises.push({ id: "custom-" + Date.now(), name: name, category: cat, metric: metric }); saveToStorage();
+            document.getElementById('new-exercise-name').value = ''; renderExerciseDictionary(); renderRoutinePickers();
         }
 
-        function quickStartExercise(name) {
-            if (!appState.activeWorkout) startWorkoutEngine(`Focus - ${name}`, [name]);
-            else addExerciseToActive(name);
-            switchTab('workout');
-        }
-
-        function openAddExerciseModal() {
-            document.getElementById('exercise-modal').classList.remove('hidden');
-            currentModalCategory = "All"; renderCategoryPills('modal-filter-pills', currentModalCategory, 'changeModalFilter');
-            renderModalExercises();
-        }
-
-        function closeAddExerciseModal() {
-            document.getElementById('exercise-modal').classList.add('hidden');
-            document.getElementById('modal-search').value = '';
-        }
+        function quickStartExercise(name) { if (!appState.activeWorkout) startWorkoutEngine(`Focus - ${name}`, [name]); else addExerciseToActive(name); switchTab('workout'); }
+        function openAddExerciseModal() { document.getElementById('exercise-modal').classList.remove('hidden'); currentModalCategory = "All"; renderCategoryPills('modal-filter-pills', currentModalCategory, 'changeModalFilter'); renderModalExercises(); }
+        function closeAddExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); document.getElementById('modal-search').value = ''; }
 
         function renderModalExercises() {
-            const container = document.getElementById('modal-list');
-            const term = document.getElementById('modal-search').value.toLowerCase();
-            container.innerHTML = '';
+            const container = document.getElementById('modal-list'); const term = document.getElementById('modal-search').value.toLowerCase(); container.innerHTML = '';
             let filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(term));
             if (currentModalCategory !== "All") filtered = filtered.filter(e => e.category === currentModalCategory);
-
             filtered.sort((a,b)=>a.name.localeCompare(b.name)).forEach(e => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left py-2.5 px-3 bg-slate-800 border border-slate-700/60 text-slate-200 rounded-xl text-xs flex justify-between items-center mb-1";
-                btn.onclick = () => addExerciseToActive(e.name);
-                btn.innerHTML = `<span>${e.name}</span> <span class="text-[9px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full">${e.category}</span>`;
+                const btn = document.createElement('button'); btn.className = "w-full text-left py-2.5 px-3 bg-slate-800 border border-slate-700/60 text-slate-200 rounded-xl text-xs flex justify-between items-center mb-1";
+                btn.onclick = () => addExerciseToActive(e.name); btn.innerHTML = `<span>${e.name}</span> <span class="text-[9px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full">${e.category}</span>`;
                 container.appendChild(btn);
             });
         }
 
-        // TAB 4 HISTORY
+        // HISTORY TAB
         function renderHistoryLogView() {
-            const listContainer = document.getElementById('history-list');
-            const emptyLabel = document.getElementById('history-empty');
-            listContainer.innerHTML = '';
-
+            const listContainer = document.getElementById('history-list'); const emptyLabel = document.getElementById('history-empty'); listContainer.innerHTML = '';
             if (!appState.history || appState.history.length === 0) { emptyLabel.classList.remove('hidden'); return; }
             emptyLabel.classList.add('hidden');
 
             for (let i = appState.history.length - 1; i >= 0; i--) {
                 const log = appState.history[i];
-                const block = document.createElement('div');
-                block.className = "bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative";
+                const block = document.createElement('div'); block.className = "bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative";
                 
                 let innerExercises = '';
                 log.exercises.forEach(ex => {
-                    let label1 = "lbs"; let label2 = "reps";
+                    let label1 = "lbs"; let label2 = "reps"; let isBw = false;
                     if(ex.metric === "time") { label1 = "m"; label2 = "s"; }
-                    if(ex.metric === "distance_time") { label1 = "mi"; label2 = "m"; }
+                    else if(ex.metric === "distance_time") { label1 = "mi"; label2 = "m"; }
+                    else if(ex.metric === "dumbbell_reps") { label1 = "lbs/h"; label2 = "reps"; }
+                    else if(ex.metric === "bodyweight") { isBw = true; label2 = "reps"; }
 
-                    let setTokens = ex.sets.map(s => `${s.v1}${label1} x ${s.v2}${label2}`).join(', ');
+                    let setTokens = ex.sets.map(s => isBw ? `${s.v2} ${label2}` : `${s.v1}${label1} x ${s.v2}${label2}`).join(', ');
                     let groupTag = ex.supersetGroup ? `<span class="text-[9px] border border-slate-700 bg-slate-900 text-slate-400 px-1 rounded mr-1">Link ${ex.supersetGroup}</span>` : "";
-
                     innerExercises += `<div class="text-xs text-slate-300"><span class="font-bold text-slate-400 flex items-center">${groupTag}${ex.name}:</span> <span class="font-mono text-[11px] text-slate-400 block pl-2 mt-0.5">${setTokens}</span></div>`;
                 });
 
                 if (log.exercises.length === 0 && log.warmupMinutes > 0) innerExercises = `<p class="text-xs text-indigo-400 italic">Target block focused entirely on Warm-up work.</p>`;
 
-                block.innerHTML = `
-                    <button onclick="deleteHistoryLog('${log.id}')" class="absolute top-3 right-3 text-slate-600 hover:text-rose-500 text-xs p-1">Delete</button>
-                    <div class="flex justify-between items-baseline border-b border-slate-900 pb-2">
-                        <div>
-                            <h4 class="font-bold text-white text-sm">${log.name}</h4>
-                            <p class="text-[10px] text-slate-500">${log.date} • ${log.durationMins}m ${log.warmupMinutes > 0 ? `(Inc. ${log.warmupMinutes}m Warm-up)` : ''}</p>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5">${innerExercises}</div>
-                `;
+                block.innerHTML = `<button onclick="deleteHistoryLog('${log.id}')" class="absolute top-3 right-3 text-slate-600 hover:text-rose-500 text-xs p-1">Delete</button><div class="flex justify-between items-baseline border-b border-slate-900 pb-2"><div><h4 class="font-bold text-white text-sm">${log.name}</h4><p class="text-[10px] text-slate-500">${log.date} • ${log.durationMins}m ${log.warmupMinutes > 0 ? `(Inc. ${log.warmupMinutes}m Warm-up)` : ''}</p></div></div><div class="space-y-1.5">${innerExercises}</div>`;
                 listContainer.appendChild(block);
             }
         }
 
         function deleteHistoryLog(logId) {
-            if (confirm("Permanently erase record row?")) {
-                appState.history = appState.history.filter(h => h.id !== logId);
-                saveToStorage(); renderHistoryLogView(); renderScheduleDashboard();
-            }
+            if (confirm("Permanently erase record row?")) { appState.history = appState.history.filter(h => h.id !== logId); saveToStorage(); renderHistoryLogView(); renderScheduleDashboard(); }
         }
     </script>
 </body>
