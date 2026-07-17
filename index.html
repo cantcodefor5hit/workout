@@ -65,7 +65,7 @@
                     </div>
 
                     <div class="space-y-4">
-                        <input id="routine-name-input" type="text" placeholder="Routine Name (e.g., Rehab PT)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-indigo-500 font-bold">
+                        <input id="routine-name-input" type="text" placeholder="Routine Title (e.g., Rehab PT)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-indigo-500 font-bold">
                         
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wide">Target Days (Multiple Allowed):</p>
@@ -108,7 +108,7 @@
                 <div id="active-workout-container" class="hidden space-y-5">
                     <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3">
                         <div class="flex justify-between items-center">
-                            <input id="active-workout-name" type="text" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 text-base font-bold text-white focus:outline-none px-1 py-0.5" value="Freestyle Session">
+                            <input id="active-workout-title" type="text" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 text-base font-bold text-white focus:outline-none px-1 py-0.5" value="Freestyle Session">
                             <span id="workout-timer" class="text-sm font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">00:00</span>
                         </div>
                         
@@ -145,7 +145,8 @@
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
                     <h3 class="font-bold text-sm uppercase tracking-wider text-indigo-400">Add Custom Exercise</h3>
                     <div class="grid grid-cols-1 gap-2">
-                        <input id="new-exercise-name" type="text" autocomplete="nope" data-lpignore="true" data-form-type="other" spellcheck="false" placeholder="Exercise Name" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <!-- Renamed ID and Placeholder to evade autofill -->
+                        <input id="new-ex-lbl" type="text" autocomplete="nope" data-lpignore="true" data-form-type="other" spellcheck="false" placeholder="Exercise Title" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
                         <select id="new-exercise-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none">
                             <option value="Legs">Legs</option>
                             <option value="Chest">Chest</option>
@@ -248,7 +249,8 @@
 
             <div id="modal-custom-view" class="hidden flex-col space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 uppercase">Quick Add to Dictionary</h4>
-                <input id="modal-new-ex-name" type="text" autocomplete="nope" data-lpignore="true" data-form-type="other" spellcheck="false" placeholder="New Movement Name" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+                <!-- Renamed ID and Placeholder to evade autofill -->
+                <input id="modal-new-ex-lbl" type="text" autocomplete="nope" data-lpignore="true" data-form-type="other" spellcheck="false" placeholder="New Movement Title" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
                 <div class="grid grid-cols-2 gap-2">
                     <select id="modal-new-ex-cat" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none">
                         <option value="Legs">Legs</option>
@@ -658,7 +660,7 @@
                 appState.activeWorkout.exercises.push({ name: exName, supersetGroup: setGroup, metric: setMetric, sets: blueprint });
             });
             
-            document.getElementById('active-workout-name').value = title; document.getElementById('warmup-display').innerText = "0 mins";
+            document.getElementById('active-workout-title').value = title; document.getElementById('warmup-display').innerText = "0 mins";
             saveToStorage(); switchTab('workout');
         }
 
@@ -848,7 +850,7 @@
             if (cleanLoggedExercises.length === 0 && appState.activeWorkout.warmupMinutes === 0) return alert("No performance rows or warm-ups recorded. Use 'Discard' to wipe entirely.");
 
             appState.history.push({
-                id: "log-" + Date.now(), name: document.getElementById('active-workout-name').value || "Completed Workout",
+                id: "log-" + Date.now(), name: document.getElementById('active-workout-title').value || "Completed Workout",
                 date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
                 durationMins: Math.floor((Date.now() - appState.activeWorkout.startTime) / 60000),
                 warmupMinutes: appState.activeWorkout.warmupMinutes, originatingDay: appState.activeWorkout.originatingDay,
@@ -876,7 +878,7 @@
             document.getElementById('modal-search').value = ''; 
             document.getElementById('modal-default-view').classList.remove('hidden');
             document.getElementById('modal-custom-view').classList.add('hidden');
-            document.getElementById('modal-new-ex-name').value = '';
+            document.getElementById('modal-new-ex-lbl').value = '';
         }
 
         function toggleModalCustomView() {
@@ -890,7 +892,7 @@
         }
 
         function saveModalCustomExercise() {
-            const name = document.getElementById('modal-new-ex-name').value.trim();
+            const name = document.getElementById('modal-new-ex-lbl').value.trim();
             const cat = document.getElementById('modal-new-ex-cat').value;
             const metric = document.getElementById('modal-new-ex-metric').value;
             
@@ -900,7 +902,7 @@
             appState.exercises.push({ id: "custom-" + Date.now(), name: name, category: cat, metric: metric });
             saveToStorage();
             
-            document.getElementById('modal-new-ex-name').value = '';
+            document.getElementById('modal-new-ex-lbl').value = '';
             toggleModalCustomView();
             handleModalExerciseSelection(name);
         }
@@ -968,11 +970,11 @@
         }
 
         function addNewCustomExercise() {
-            const name = document.getElementById('new-exercise-name').value.trim(); const cat = document.getElementById('new-exercise-category').value; const metric = document.getElementById('new-exercise-metric').value;
+            const name = document.getElementById('new-ex-lbl').value.trim(); const cat = document.getElementById('new-exercise-category').value; const metric = document.getElementById('new-exercise-metric').value;
             if (!name) return alert("Enter a workout name configuration.");
             if (appState.exercises.some(e => e.name.toLowerCase() === name.toLowerCase())) return alert("Name conflict row already exists.");
             appState.exercises.push({ id: "custom-" + Date.now(), name: name, category: cat, metric: metric }); saveToStorage();
-            document.getElementById('new-exercise-name').value = ''; renderExerciseDictionary();
+            document.getElementById('new-ex-lbl').value = ''; renderExerciseDictionary();
         }
 
         function quickStartExercise(name) { 
