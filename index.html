@@ -352,8 +352,8 @@
         }
 
         function getPRData(exerciseName, metric) {
-            let pr = null;
-            let prDate = "";
+            let maxWt = null; 
+            let maxRep = null;
 
             appState.history.forEach(log => {
                 const fEx = log.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
@@ -362,26 +362,22 @@
                         let p1 = parseFloat(set.v1) || 0;
                         let p2 = parseFloat(set.v2) || 0;
 
-                        if (!pr) {
-                            pr = { v1: p1, v2: p2 };
-                            prDate = log.date;
-                        } else {
-                            if (metric === 'weight_reps' || metric === 'dumbbell_reps' || metric === 'machine_weight_reps' || metric === 'dumbbell_time') {
-                                if (p1 > pr.v1 || (p1 === pr.v1 && p2 > pr.v2)) { pr = {v1: p1, v2: p2}; prDate = log.date; }
-                            } else if (metric === 'bodyweight') {
-                                if (p2 > pr.v2) { pr = {v1: 0, v2: p2}; prDate = log.date; }
-                            } else if (metric === 'distance_time') {
-                                if (p1 > pr.v1 || (p1 === pr.v1 && p2 < pr.v2 && p2 > 0)) { pr = {v1: p1, v2: p2}; prDate = log.date; }
-                            } else if (metric === 'time') {
-                                let currentTotal = (p1 * 60) + p2;
-                                let prTotal = (pr.v1 * 60) + pr.v2;
-                                if (currentTotal > prTotal) { pr = {v1: p1, v2: p2}; prDate = log.date; }
-                            }
-                        }
+                        if (!maxWt || p1 > maxWt.v1 || (p1 === maxWt.v1 && p2 > maxWt.v2)) maxWt = {v1: p1, v2: p2, date: log.date};
+                        if (!maxRep || p2 > maxRep.v2 || (p2 === maxRep.v2 && p1 > maxRep.v1)) maxRep = {v1: p1, v2: p2, date: log.date};
                     });
                 }
             });
-            return pr ? { ...pr, date: prDate } : null;
+            return { maxWt, maxRep };
+        }
+
+        function formatPrText(prObj, metric) {
+            if (!prObj) return "";
+            if (metric === 'bodyweight') return `${prObj.v2} reps (${prObj.date})`;
+            if (metric === 'time') return `${prObj.v1}m ${prObj.v2}s (${prObj.date})`;
+            if (metric === 'distance_time') return `${prObj.v1} mi in ${prObj.v2}m (${prObj.date})`;
+            if (metric === 'dumbbell_reps') return `${prObj.v1} lbs/h x ${prObj.v2} (${prObj.date})`;
+            if (metric === 'dumbbell_time') return `${prObj.v1} lbs/h x ${prObj.v2}s (${prObj.date})`;
+            return `${prObj.v1} lbs x ${prObj.v2} (${prObj.date})`;
         }
 
         function exportDataBackup() {
@@ -495,7 +491,6 @@
         }
         function addRestTime(seconds) { restTimeRemaining += seconds; updateRestTimerUI(); }
         function dismissRestTimer() { if(restTimerInterval) clearInterval(restTimerInterval); document.getElementById('rest-timer-panel').classList.add('translate-y-[150%]'); }
-
 
         // ==========================================
         // TAB 1: HOME DASHBOARD & ROUTINE BUILDER
@@ -683,7 +678,7 @@
                 groupedExercises.push([ex]);
             });
 
-            groupedExercises.forEach(group => {
+            groupedExercises.forEach((group, groupIndex) => {
                 let groupBorder = "border-slate-800";
                 if (group[0].supersetGroup === "A") groupBorder = "border-amber-500 border-l-4";
                 if (group[0].supersetGroup === "B") groupBorder = "border-cyan-500 border-l-4";
@@ -692,21 +687,37 @@
                 const groupContainer = document.createElement('div');
                 groupContainer.className = `bg-slate-950 rounded-xl border ${groupBorder} overflow-hidden shadow-sm`;
 
-                group.forEach((activeEx, groupIndex) => {
+                // Add Collapse Header
+                const collapseId = `collapse-group-${groupIndex}`;
+                groupContainer.innerHTML = `
+                    <div class="flex justify-between items-center bg-slate-900/40 px-3 py-2 border-b border-slate-900">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">${group.length > 1 ? 'Linked Group' : 'Movement Block'}</span>
+                        <button onclick="document.getElementById('${collapseId}').classList.toggle('hidden'); this.innerText = this.innerText === 'Hide 🔼' ? 'Show 🔽' : 'Hide 🔼';" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold bg-indigo-500/10 px-2 py-0.5 rounded transition">Hide 🔼</button>
+                    </div>
+                    <div id="${collapseId}" class="transition-all duration-200"></div>
+                `;
+
+                const contentWrapper = groupContainer.querySelector(`#${collapseId}`);
+
+                group.forEach((activeEx, innerIndex) => {
                     const exIndex = activeEx._originalIndex;
                     const pastSets = getLastPerformanceData(activeEx.name);
 
-                    let prText = "";
+                    // Dual PR Logic Check
                     const pr = getPRData(activeEx.name, activeEx.metric);
-                    if (pr) {
-                        if (activeEx.metric === 'bodyweight') prText = `🏆 PR: ${pr.v2} reps (${pr.date})`;
-                        else if (activeEx.metric === 'time') prText = `🏆 PR: ${pr.v1}m ${pr.v2}s (${pr.date})`;
-                        else if (activeEx.metric === 'distance_time') prText = `🏆 PR: ${pr.v1} mi in ${pr.v2}m (${pr.date})`;
-                        else if (activeEx.metric === 'dumbbell_reps') prText = `🏆 PR: ${pr.v1} lbs/h x ${pr.v2} (${pr.date})`;
-                        else if (activeEx.metric === 'dumbbell_time') prText = `🏆 PR: ${pr.v1} lbs/h x ${pr.v2}s (${pr.date})`;
-                        else prText = `🏆 PR: ${pr.v1} lbs x ${pr.v2} (${pr.date})`;
+                    let prBadgeHtml = "";
+                    
+                    if (pr.maxWt) {
+                        if (pr.maxWt.v1 === pr.maxRep.v1 && pr.maxWt.v2 === pr.maxRep.v2) {
+                            prBadgeHtml = `<div class="mt-1"><span class="text-[9px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded shadow-sm inline-block">🏆 PR: ${formatPrText(pr.maxWt, activeEx.metric)}</span></div>`;
+                        } else {
+                            prBadgeHtml = `
+                            <div class="mt-1 flex flex-wrap gap-1">
+                                <span class="text-[9px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded shadow-sm inline-block">🏆 Max Load: ${formatPrText(pr.maxWt, activeEx.metric)}</span>
+                                <span class="text-[9px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded shadow-sm inline-block">🏆 Max Vol: ${formatPrText(pr.maxRep, activeEx.metric)}</span>
+                            </div>`;
+                        }
                     }
-                    let prBadgeHtml = prText ? `<div class="mt-1"><span class="text-[9px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded shadow-sm inline-block">${prText}</span></div>` : '';
 
                     let label1 = "lbs"; let label2 = "reps"; let isBodyweight = false;
                     if(activeEx.metric === "time") { label1 = "mins"; label2 = "secs"; }
@@ -745,7 +756,7 @@
                     if (activeEx.supersetGroup === "B") groupLabelHtml = "<span class='text-[10px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.2 rounded font-bold uppercase shrink-0'>Link B</span>";
                     if (activeEx.supersetGroup === "C") groupLabelHtml = "<span class='text-[10px] bg-fuchsia-500/20 text-fuchsia-400 px-1.5 py-0.2 rounded font-bold uppercase shrink-0'>Link C</span>";
 
-                    const borderBottom = groupIndex < group.length - 1 ? 'border-b border-slate-900/50' : '';
+                    const borderBottom = innerIndex < group.length - 1 ? 'border-b border-slate-900/50' : '';
                     const exDiv = document.createElement('div');
                     exDiv.className = `p-3 space-y-2 transition-all ${borderBottom}`;
                     
@@ -771,7 +782,7 @@
                             <button onclick="removeExerciseFromActive(${exIndex})" class="text-[10px] text-slate-500 hover:text-rose-400">Remove Exercise</button>
                         </div>
                     `;
-                    groupContainer.appendChild(exDiv);
+                    contentWrapper.appendChild(exDiv);
                 });
                 listContainer.appendChild(groupContainer);
             });
