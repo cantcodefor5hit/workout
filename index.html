@@ -44,7 +44,7 @@
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Planner</h3>
                             <span class="text-[10px] text-slate-500 italic">Resets Mondays</span>
                         </div>
-                        <div id="weekly-dashboard-grid" class="space-y-3"></div>
+                        <div id="weekly-dashboard-grid" class="space-y-2"></div>
                     </div>
 
                     <div class="space-y-3">
@@ -157,10 +157,10 @@
                             <option value="Stretching & Warm-up">Stretching & Warm-up</option>
                         </select>
                         <select id="new-exercise-metric" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none">
-                            <option value="weight_reps">Barbell / Machine (lbs & reps)</option>
-                            <option value="dumbbell_reps">Dumbbells (lbs per hand & reps)</option>
-                            <option value="bodyweight">Bodyweight (reps only)</option>
-                            <option value="time">Time Only (mins & secs)</option>
+                            <option value="weight_reps">Barbell (lbs & reps)</option>
+                            <option value="dumbbell_reps">Dumbbell (lbs/hand)</option>
+                            <option value="bodyweight">Bodyweight (reps)</option>
+                            <option value="time">Time Only (mins/secs)</option>
                             <option value="distance_time">Distance & Time</option>
                         </select>
                         <button onclick="addNewCustomExercise()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition">
@@ -222,7 +222,7 @@
         </nav>
     </div>
 
-    <!-- ADD EXERCISE MODAL (NOW INCLUDES INLINE CUSTOM CREATION) -->
+    <!-- MODAL -->
     <div id="exercise-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-end justify-center">
         <div class="bg-slate-900 w-full max-w-md border-t border-slate-800 rounded-t-2xl p-4 space-y-3 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
@@ -233,7 +233,6 @@
                 <button onclick="closeAddExerciseModal()" class="text-slate-400 p-1 text-sm bg-slate-800 rounded-full w-7 h-7 flex items-center justify-center">✕</button>
             </div>
             
-            <!-- DEFAULT LIST VIEW -->
             <div id="modal-default-view" class="flex flex-col flex-1 min-h-0">
                 <div class="space-y-2 mb-2">
                     <button onclick="toggleModalCustomView()" class="w-full py-2 bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold rounded-lg hover:bg-indigo-600/20 transition">
@@ -245,7 +244,6 @@
                 <div id="modal-list" class="flex-1 overflow-y-auto space-y-1 pr-1"></div>
             </div>
 
-            <!-- INLINE CUSTOM CREATOR VIEW -->
             <div id="modal-custom-view" class="hidden flex-col space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 uppercase">Quick Add to Dictionary</h4>
                 <input id="modal-new-ex-name" type="text" placeholder="New Movement Name" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
@@ -349,7 +347,6 @@
             }
         }
 
-        // PR CALCULATION ENGINE
         function getPRData(exerciseName, metric) {
             let pr = null;
             let prDate = "";
@@ -495,6 +492,7 @@
         function addRestTime(seconds) { restTimeRemaining += seconds; updateRestTimerUI(); }
         function dismissRestTimer() { if(restTimerInterval) clearInterval(restTimerInterval); document.getElementById('rest-timer-panel').classList.add('translate-y-[150%]'); }
 
+
         // ==========================================
         // TAB 1: HOME DASHBOARD & ROUTINE BUILDER
         // ==========================================
@@ -507,35 +505,34 @@
                 const isToday = (day === currentDayStr);
                 
                 const dayContainer = document.createElement('div');
-                dayContainer.className = `p-3 rounded-xl border space-y-2 ${isToday ? 'bg-indigo-950/20 border-indigo-500/40 shadow-sm' : 'bg-slate-950 border-slate-800'}`;
-                dayContainer.innerHTML = `<h4 class="font-bold ${isToday ? 'text-indigo-400' : 'text-slate-400'} text-xs uppercase border-b border-slate-800/50 pb-1 mb-2">${day}${isToday ? ' 📍' : ''}</h4>`;
-
+                // Strict, highly compact horizontal layout for every single day
+                dayContainer.className = `flex items-center p-2 rounded-xl border h-14 ${isToday ? 'bg-indigo-950/20 border-indigo-500/40 shadow-sm' : 'bg-slate-950 border-slate-800'}`;
+                
+                let routinesHtml = '';
                 if (scheduledIds.length === 0) {
-                    dayContainer.innerHTML += `<p class="text-slate-500 italic text-xs">Rest / Unscheduled</p>`;
+                    routinesHtml = `<p class="text-slate-500 italic text-xs pl-1">Rest</p>`;
                 } else {
                     scheduledIds.forEach(targetRoutineId => {
                         const foundRoutine = appState.routines.find(r => r.id === targetRoutineId);
                         if (foundRoutine) {
                             let isFinishedThisWeek = appState.history.some(log => log.originatingDay === day && log.routineTemplateId === targetRoutineId && isLogFromCurrentWeek(log.date));
-                            const exList = foundRoutine.exercises.map(e => e.name).join(', ');
-                            
-                            const row = document.createElement('div');
-                            row.className = `flex items-center justify-between p-2 rounded-lg bg-slate-900 border ${isFinishedThisWeek ? 'opacity-75 border-emerald-500/30' : 'border-slate-800'}`;
-                            
-                            row.innerHTML = `
-                                <div class="flex-1 min-w-0 pr-2">
-                                    <div class="flex items-center space-x-2">
-                                        <p class="font-bold text-white text-sm truncate">${foundRoutine.name}</p>
-                                        ${isFinishedThisWeek ? '<span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold border border-emerald-500/30 shrink-0">✓ Done</span>' : ''}
-                                    </div>
-                                    <p class="text-[10px] text-slate-400 truncate">${exList}</p>
-                                </div>
-                                <button onclick="startWorkoutEngine('${foundRoutine.name}', ${JSON.stringify(foundRoutine.exercises).replace(/"/g, '&quot;')}, '${day}', '${foundRoutine.id}')" class="shrink-0 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition ${isFinishedThisWeek ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-500'}">${isFinishedThisWeek ? 'Redo' : 'Start'}</button>
-                            `;
-                            dayContainer.appendChild(row);
+                            // Horizontally scrolling pill buttons for multiple routines
+                            routinesHtml += `<button onclick="startWorkoutEngine('${foundRoutine.name}', ${JSON.stringify(foundRoutine.exercises).replace(/"/g, '&quot;')}, '${day}', '${foundRoutine.id}')" class="shrink-0 flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition ${isFinishedThisWeek ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-400' : 'bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500'} text-[10px] font-bold shadow-sm">
+                                <span>${foundRoutine.name}</span>
+                                ${isFinishedThisWeek ? '<span>✓</span>' : '<span>▶</span>'}
+                            </button>`;
                         }
                     });
                 }
+
+                dayContainer.innerHTML = `
+                    <div class="w-12 shrink-0 border-r border-slate-800/60 mr-2 flex flex-col justify-center h-full">
+                        <span class="font-bold ${isToday ? 'text-indigo-400' : 'text-slate-400'} text-xs uppercase">${day}${isToday ? '📍' : ''}</span>
+                    </div>
+                    <div class="flex-1 flex items-center overflow-x-auto gap-2 no-scrollbar pr-1">
+                        ${routinesHtml}
+                    </div>
+                `;
                 grid.appendChild(dayContainer);
             });
         }
@@ -655,7 +652,6 @@
                 let setMetric = config.metric || dictEntry.metric;
                 let setGroup = config.supersetGroup || "";
 
-                // HARD FILL LOGIC
                 const pastSets = getLastPerformanceData(exName); let blueprint = [];
                 if (pastSets) pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
                 else blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
@@ -696,7 +692,6 @@
                     const exIndex = activeEx._originalIndex;
                     const pastSets = getLastPerformanceData(activeEx.name);
 
-                    // Fetch Dynamic PR
                     let prText = "";
                     const pr = getPRData(activeEx.name, activeEx.metric);
                     if (pr) {
@@ -776,14 +771,32 @@
         }
 
         function updateSetData(exIndex, setIndex, field, value) { appState.activeWorkout.exercises[exIndex].sets[setIndex][field] = value; saveToStorage(); }
+        
         function toggleSetCheckmark(exIndex, setIndex) {
             const current = appState.activeWorkout.exercises[exIndex].sets[setIndex].isDone;
             appState.activeWorkout.exercises[exIndex].sets[setIndex].isDone = !current;
             saveToStorage(); renderActiveWorkoutView();
             if(!current) triggerRestTimer();
         }
+
         function updateExerciseGroup(exIndex, groupValue) { appState.activeWorkout.exercises[exIndex].supersetGroup = groupValue; saveToStorage(); renderActiveWorkoutView(); }
-        function addSetToActive(exIndex) { appState.activeWorkout.exercises[exIndex].sets.push({ v1: "", v2: "", isDone: false }); saveToStorage(); renderActiveWorkoutView(); }
+        
+        // NEW COPY ABOVE PREPOPULATION LOGIC
+        function addSetToActive(exIndex) { 
+            const ex = appState.activeWorkout.exercises[exIndex];
+            let lastV1 = ""; 
+            let lastV2 = "";
+            
+            if (ex.sets.length > 0) {
+                lastV1 = ex.sets[ex.sets.length - 1].v1;
+                lastV2 = ex.sets[ex.sets.length - 1].v2;
+            }
+            
+            ex.sets.push({ v1: lastV1, v2: lastV2, isDone: false }); 
+            saveToStorage(); 
+            renderActiveWorkoutView(); 
+        }
+
         function removeSetFromActive(exIndex, setIndex) { appState.activeWorkout.exercises[exIndex].sets.splice(setIndex, 1); saveToStorage(); renderActiveWorkoutView(); }
         function removeExerciseFromActive(exIndex) { appState.activeWorkout.exercises.splice(exIndex, 1); saveToStorage(); renderActiveWorkoutView(); }
 
