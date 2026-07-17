@@ -19,7 +19,7 @@
         
         <!-- HEADER -->
         <header class="bg-slate-950/90 backdrop-blur border-b border-slate-800 p-4 shrink-0 flex justify-between items-center z-40">
-            <h1 id="page-title" class="text-xl font-bold tracking-tight text-indigo-400">Weekly Schedule</h1>
+            <h1 id="page-title" class="text-xl font-bold tracking-tight text-indigo-400">Home Dashboard</h1>
             <div id="active-workout-indicator" class="hidden text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full font-medium border border-emerald-500/30 animate-pulse">
                 Workout Live
             </div>
@@ -28,23 +28,42 @@
         <!-- MAIN SCROLLABLE CONTAINER -->
         <main class="flex-1 p-4 overflow-y-auto pb-28 relative">
 
-            <!-- TAB 1: WEEKLY PLANNER -->
-            <div id="tab-today" class="tab-content active space-y-6">
-                <div class="space-y-3">
-                    <div class="flex justify-between items-baseline">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Tracker Matrix</h3>
-                        <span class="text-[10px] text-slate-500 italic">Resets automatically every Monday</span>
+            <!-- TAB 1: HOME DASHBOARD & TEMPLATE BUILDER -->
+            <div id="tab-home" class="tab-content active space-y-6">
+                
+                <!-- DEFAULT DASHBOARD VIEW -->
+                <div id="home-dashboard-view" class="space-y-6">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-baseline">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Planner</h3>
+                            <span class="text-[10px] text-slate-500 italic">Resets Mondays</span>
+                        </div>
+                        <div id="weekly-dashboard-grid" class="space-y-2"></div>
                     </div>
-                    <div id="weekly-dashboard-grid" class="space-y-2"></div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Your Routines</h4>
+                            <button onclick="openRoutineBuilder()" class="text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg shadow">
+                                + New Routine
+                            </button>
+                        </div>
+                        <div id="created-routines-list" class="space-y-2"></div>
+                    </div>
                 </div>
 
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
-                    <h3 class="font-bold text-sm uppercase tracking-wider text-indigo-400">Create Weekly Routine</h3>
-                    <div class="space-y-3">
-                        <input id="routine-name-input" type="text" placeholder="Routine Name (e.g., Push Day)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                <!-- ROUTINE BUILDER ENGINE (HIDDEN BY DEFAULT) -->
+                <div id="routine-builder-view" class="hidden bg-slate-950 p-4 rounded-xl border border-indigo-500/30 shadow-lg shadow-indigo-900/10 space-y-5">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h3 id="builder-title" class="font-bold text-sm uppercase tracking-wider text-indigo-400">Template Builder</h3>
+                        <button onclick="closeRoutineBuilder()" class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded border border-slate-700">Cancel</button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <input id="routine-name-input" type="text" placeholder="Routine Name (e.g., Push Day)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-indigo-500 font-bold">
                         
                         <div>
-                            <p class="text-xs font-bold text-slate-400 mb-1.5">Map to Template Target Days:</p>
+                            <p class="text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wide">Target Days (Optional):</p>
                             <div class="flex flex-wrap gap-1.5 text-xs">
                                 <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Mon" class="day-checkbox"> <span>Mon</span></label>
                                 <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Tue" class="day-checkbox"> <span>Tue</span></label>
@@ -57,22 +76,22 @@
                         </div>
 
                         <div>
-                            <div class="flex justify-between text-xs font-bold text-slate-400 mb-1">
-                                <span>Select Routine Movements:</span>
-                                <span class="text-indigo-400 text-[10px] font-normal">💡 Selecting defaults to 3 sets</span>
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Routine Movements:</p>
                             </div>
-                            <div id="routine-exercise-picker" class="max-h-40 overflow-y-auto border border-slate-800 rounded-lg p-2 space-y-1 bg-slate-900/50 text-xs"></div>
+                            
+                            <!-- DYNAMIC LIST OF EXERCISES ADDED TO THIS ROUTINE -->
+                            <div id="builder-exercises-list" class="space-y-2 mb-3"></div>
+
+                            <button onclick="openAddExerciseModal('routine')" class="w-full py-2 bg-slate-900 border border-dashed border-slate-600 text-slate-300 text-xs font-semibold rounded-lg hover:border-indigo-500 hover:text-indigo-400 transition">
+                                ➕ Add Movement to Routine
+                            </button>
                         </div>
 
-                        <button onclick="saveCustomRoutine()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition shadow-lg">
-                            Save Routine Template
+                        <button onclick="saveRoutineTemplate()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl transition shadow-lg mt-4">
+                            💾 Save Routine Template
                         </button>
                     </div>
-                </div>
-
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Your Routine Blueprints</h4>
-                    <div id="created-routines-list" class="space-y-2"></div>
                 </div>
             </div>
 
@@ -105,7 +124,7 @@
                     <div id="active-exercises-list" class="space-y-4"></div>
 
                     <div class="space-y-3 pt-2">
-                        <button onclick="openAddExerciseModal()" class="w-full py-2.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 font-medium rounded-xl text-sm">
+                        <button onclick="openAddExerciseModal('workout')" class="w-full py-2.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 font-medium rounded-xl text-sm">
                             ➕ Add Exercise to This Workout
                         </button>
                         <div class="grid grid-cols-2 gap-3">
@@ -187,8 +206,8 @@
 
         <!-- PERSISTENT MOBILE NAVIGATION BAR -->
         <nav class="shrink-0 bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-50 px-2">
-            <button onclick="switchTab('today')" id="nav-today" class="flex flex-col items-center justify-center flex-1 py-2 text-indigo-400 font-medium text-xs">
-                <span class="text-lg mb-0.5">🗓️</span><span>Plan</span>
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center justify-center flex-1 py-2 text-indigo-400 font-medium text-xs">
+                <span class="text-lg mb-0.5">🏠</span><span>Home</span>
             </button>
             <button onclick="switchTab('workout')" id="nav-workout" class="flex flex-col items-center justify-center flex-1 py-2 text-slate-500 font-medium text-xs">
                 <span class="text-lg mb-0.5">🏋️‍♂️</span><span>Track</span>
@@ -208,7 +227,7 @@
             <div class="flex justify-between items-center">
                 <div class="flex flex-col">
                     <h3 class="text-sm font-bold text-white">Select Exercise</h3>
-                    <span class="text-[10px] text-slate-500 font-normal">Tapping inserts 3 default set rows</span>
+                    <span id="modal-helper-text" class="text-[10px] text-slate-500 font-normal">Tapping inserts into workout</span>
                 </div>
                 <button onclick="closeAddExerciseModal()" class="text-slate-400 p-1 text-sm bg-slate-800 rounded-full w-7 h-7 flex items-center justify-center">✕</button>
             </div>
@@ -225,6 +244,11 @@
             activeWorkout: null
         };
 
+        // NEW BUILDER STATE MANAGEMENT
+        let routineBuilderExercises = [];
+        let editingRoutineId = null;
+        let activeModalTarget = 'workout'; // Can be 'workout' or 'routine'
+
         let currentDictCategory = "All";
         let currentModalCategory = "All";
         let restTimerInterval = null;
@@ -232,7 +256,6 @@
 
         const categoryOptions = ["All", "Legs", "Chest", "Back", "Shoulders", "Arms", "Core", "Cardio & Endurance", "Stretching & Warm-up"];
 
-        // BASELINE DATABASE INCLUDES ALL REQUESTED IMAGE EXERCISES WITH CORRECT METRICS
         const standardExercises = [
             { id: "img-1", name: "Goblet Squat", category: "Legs", metric: "dumbbell_reps" },
             { id: "img-2", name: "Standing Overhead Press", category: "Shoulders", metric: "weight_reps" },
@@ -247,8 +270,6 @@
             { id: "img-11", name: "Leg Curl", category: "Legs", metric: "weight_reps" },
             { id: "img-12", name: "Swimmers", category: "Stretching & Warm-up", metric: "time" },
             { id: "img-13", name: "Crunches", category: "Core", metric: "bodyweight" },
-            
-            // Standard Fillers
             { id: "se-2", name: "Deadlift (Barbell)", category: "Legs", metric: "weight_reps" },
             { id: "se-17", name: "Pull-Up", category: "Back", metric: "bodyweight" },
             { id: "se-35", name: "Plank", category: "Core", metric: "time" },
@@ -261,11 +282,11 @@
             setupTimerLoop();
         });
 
-        // BUMPED VERSION TO V5 TO ENSURE NEW EXERCISES LOAD OVER OLD CACHE
-        function saveToStorage() { localStorage.setItem('workout_app_v5_state', JSON.stringify(appState)); }
+        // Version 6 handles the structural routine array schema upgrade
+        function saveToStorage() { localStorage.setItem('workout_app_v6_state', JSON.stringify(appState)); }
 
         function loadFromStorage() {
-            const stored = localStorage.getItem('workout_app_v5_state');
+            const stored = localStorage.getItem('workout_app_v6_state');
             if (stored) {
                 appState = JSON.parse(stored);
                 if (!appState.exercises || appState.exercises.length === 0) appState.exercises = [...standardExercises];
@@ -301,12 +322,22 @@
             document.querySelectorAll('nav button').forEach(el => { el.classList.remove('text-indigo-400'); el.classList.add('text-slate-500'); });
             document.getElementById(`nav-${tabId}`).classList.remove('text-slate-500');
             document.getElementById(`nav-${tabId}`).classList.add('text-indigo-400');
-            const titles = { 'today': 'Weekly Schedule', 'workout': 'Track Session', 'exercises': 'App Dictionary', 'history': 'Performance History' };
+            const titles = { 'home': 'Home Dashboard', 'workout': 'Track Session', 'exercises': 'App Dictionary', 'history': 'Performance History' };
             document.getElementById('page-title').innerText = titles[tabId];
+            
+            // Close builder if navigating away
+            if(tabId !== 'home') closeRoutineBuilder();
+            
             renderAllViews();
         }
 
-        function renderAllViews() { renderScheduleDashboard(); renderRoutinePickers(); renderActiveWorkoutView(); renderExerciseDictionary(); renderHistoryLogView(); }
+        function renderAllViews() { 
+            renderScheduleDashboard(); 
+            renderRoutinesList(); 
+            renderActiveWorkoutView(); 
+            renderExerciseDictionary(); 
+            renderHistoryLogView(); 
+        }
 
         function isLogFromCurrentWeek(logDateStr) {
             const logDate = new Date(logDateStr);
@@ -356,7 +387,6 @@
                 if (restTimeRemaining <= 0) { dismissRestTimer(); if(navigator.vibrate) navigator.vibrate([200, 100, 200]); }
             }, 1000);
         }
-
         function updateRestTimerUI() {
             const mins = String(Math.floor(restTimeRemaining / 60)).padStart(2, '0');
             const secs = String(restTimeRemaining % 60).padStart(2, '0');
@@ -365,7 +395,9 @@
         function addRestTime(seconds) { restTimeRemaining += seconds; updateRestTimerUI(); }
         function dismissRestTimer() { if(restTimerInterval) clearInterval(restTimerInterval); document.getElementById('rest-timer-panel').classList.add('translate-y-[150%]'); }
 
-        // PLANNER & ROUTINES
+        // ==========================================
+        // TAB 1: HOME DASHBOARD & ROUTINE BUILDER
+        // ==========================================
         function renderScheduleDashboard() {
             const grid = document.getElementById('weekly-dashboard-grid'); grid.innerHTML = '';
             const daysMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]; const currentDayStr = daysMap[new Date().getDay()];
@@ -381,7 +413,8 @@
                 
                 let innerDetails = `<p class="text-slate-500 italic text-xs">Rest / Unscheduled</p>`; let actionBtn = '';
                 if (foundRoutine) {
-                    innerDetails = `<div class="flex items-center space-x-2"><p class="font-bold text-white text-sm">${foundRoutine.name}</p>${isFinishedThisWeek ? '<span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.2 rounded-full font-bold border border-emerald-500/30">✓ Finished</span>' : ''}</div><p class="text-[10px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px]">${foundRoutine.exercises.join(', ')}</p>`;
+                    const exList = foundRoutine.exercises.map(e => e.name).join(', ');
+                    innerDetails = `<div class="flex items-center space-x-2"><p class="font-bold text-white text-sm">${foundRoutine.name}</p>${isFinishedThisWeek ? '<span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.2 rounded-full font-bold border border-emerald-500/30">✓ Finished</span>' : ''}</div><p class="text-[10px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px]">${exList}</p>`;
                     actionBtn = `<button onclick="startWorkoutEngine('${foundRoutine.name}', ${JSON.stringify(foundRoutine.exercises).replace(/"/g, '&quot;')}, '${day}', '${foundRoutine.id}')" class="text-white font-bold text-xs px-3 py-1.5 rounded-lg transition ${isFinishedThisWeek ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-500'}">${isFinishedThisWeek ? 'Redo' : 'Start'}</button>`;
                 }
                 block.innerHTML = `<div class="flex items-center space-x-3 flex-1 min-w-0"><span class="w-10 font-bold ${isToday ? 'text-indigo-400' : 'text-slate-400'} text-xs uppercase">${day}${isToday ? ' 📍' : ''}</span><div class="flex-1 min-w-0">${innerDetails}</div></div><div>${actionBtn}</div>`;
@@ -389,58 +422,189 @@
             });
         }
 
-        function renderRoutinePickers() {
-            const listPicker = document.getElementById('routine-exercise-picker'); listPicker.innerHTML = '';
-            [...appState.exercises].sort((a,b) => a.name.localeCompare(b.name)).forEach(ex => {
-                const lbl = document.createElement('label'); lbl.className = "flex items-center space-x-2 py-1 border-b border-slate-800 last:border-0";
-                lbl.innerHTML = `<input type="checkbox" value="${ex.name}" class="routine-ex-checkbox"> <span class="text-slate-300">${ex.name}</span>`;
-                listPicker.appendChild(lbl);
-            });
-
-            const blueprintsContainer = document.getElementById('created-routines-list'); blueprintsContainer.innerHTML = '';
-            if (appState.routines.length === 0) { blueprintsContainer.innerHTML = `<p class="text-xs text-slate-600 italic">No templates defined.</p>`; return; }
+        function renderRoutinesList() {
+            const container = document.getElementById('created-routines-list'); container.innerHTML = '';
+            if (appState.routines.length === 0) { container.innerHTML = `<p class="text-xs text-slate-600 italic">No templates saved yet.</p>`; return; }
 
             appState.routines.forEach(rt => {
-                const card = document.createElement('div'); card.className = "bg-slate-950 p-3 rounded-lg border border-slate-800 flex justify-between items-center text-sm";
+                const card = document.createElement('div'); card.className = "bg-slate-950 p-3 rounded-lg border border-slate-800 flex flex-col space-y-2 text-sm";
                 let assignedDays = []; Object.keys(appState.schedule).forEach(day => { if (appState.schedule[day] === rt.id) assignedDays.push(day); });
-                card.innerHTML = `<div><p class="font-bold text-slate-200">${rt.name}</p><p class="text-[10px] text-indigo-400 font-medium">${rt.exercises.length} Movements • Recurring: ${assignedDays.length > 0 ? assignedDays.join(', ') : 'Unscheduled'}</p></div><div class="flex space-x-2"><button onclick="startWorkoutEngine('${rt.name}', ${JSON.stringify(rt.exercises).replace(/"/g, '&quot;')}, '', '${rt.id}')" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold px-2.5 py-1 rounded-md">Track</button><button onclick="deleteRoutineTemplate('${rt.id}')" class="text-xs text-slate-600 hover:text-rose-500 px-1">✕</button></div>`;
-                blueprintsContainer.appendChild(card);
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-slate-200 text-base">${rt.name}</p>
+                            <p class="text-[10px] text-indigo-400 font-medium">${rt.exercises.length} Movements • Recurring: ${assignedDays.length > 0 ? assignedDays.join(', ') : 'Unscheduled'}</p>
+                        </div>
+                        <div class="flex space-x-1.5">
+                            <button onclick="editRoutineTemplate('${rt.id}')" class="text-xs text-slate-400 bg-slate-900 border border-slate-700 hover:text-white px-2.5 py-1 rounded-md">Edit</button>
+                            <button onclick="startWorkoutEngine('${rt.name}', ${JSON.stringify(rt.exercises).replace(/"/g, '&quot;')}, '', '${rt.id}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">Track</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
             });
         }
 
-        function saveCustomRoutine() {
-            const name = document.getElementById('routine-name-input').value.trim();
-            if (!name) return alert("Provide a routine blueprint name.");
-            const selectedExs = []; document.querySelectorAll('.routine-ex-checkbox:checked').forEach(cb => selectedExs.push(cb.value));
-            if (selectedExs.length === 0) return alert("Select at least one movement.");
-
-            const routineId = "rt-" + Date.now(); appState.routines.push({ id: routineId, name: name, exercises: selectedExs });
-            document.querySelectorAll('.day-checkbox:checked').forEach(cb => appState.schedule[cb.value] = routineId);
+        function openRoutineBuilder() {
+            editingRoutineId = null;
+            routineBuilderExercises = [];
             document.getElementById('routine-name-input').value = '';
-            document.querySelectorAll('.day-checkbox:checked, .routine-ex-checkbox:checked').forEach(cb => cb.checked = false);
-            saveToStorage(); renderAllViews();
+            document.querySelectorAll('.day-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('builder-title').innerText = "Create New Template";
+            
+            document.getElementById('home-dashboard-view').classList.add('hidden');
+            document.getElementById('routine-builder-view').classList.remove('hidden');
+            renderBuilderExercises();
         }
 
-        function deleteRoutineTemplate(rtId) {
-            if (confirm("Permanently erase template design?")) {
-                appState.routines = appState.routines.filter(r => r.id !== rtId);
-                Object.keys(appState.schedule).forEach(day => { if (appState.schedule[day] === rtId) appState.schedule[day] = ""; });
-                saveToStorage(); renderAllViews();
-            }
-        }
+        function editRoutineTemplate(rtId) {
+            const rt = appState.routines.find(r => r.id === rtId);
+            if(!rt) return;
 
-        // WORKOUT ENGINE
-        function startWorkoutEngine(title, exerciseNameArray, originatingDay = "", routineTemplateId = "") {
-            appState.activeWorkout = { name: title, startTime: Date.now(), warmupMinutes: 0, originatingDay: originatingDay, routineTemplateId: routineTemplateId, exercises: [] };
-            exerciseNameArray.forEach(name => {
-                const dictEntry = appState.exercises.find(e => e.name === name) || { metric: 'weight_reps' };
-                const pastSets = getLastPerformanceData(name); let blueprint = [];
-                if (pastSets) pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
-                else blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
-                appState.activeWorkout.exercises.push({ name: name, supersetGroup: "", metric: dictEntry.metric, sets: blueprint });
+            editingRoutineId = rtId;
+            // Deep copy existing config objects to prevent live mutation before saving
+            routineBuilderExercises = JSON.parse(JSON.stringify(rt.exercises)); 
+            document.getElementById('routine-name-input').value = rt.name;
+            
+            document.querySelectorAll('.day-checkbox').forEach(cb => {
+                cb.checked = (appState.schedule[cb.value] === rtId);
             });
-            document.getElementById('active-workout-name').value = title; document.getElementById('warmup-display').innerText = "0 mins";
-            saveToStorage(); switchTab('workout');
+
+            document.getElementById('builder-title').innerText = "Edit Template";
+            document.getElementById('home-dashboard-view').classList.add('hidden');
+            document.getElementById('routine-builder-view').classList.remove('hidden');
+            
+            // Auto scroll to top where builder is
+            document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
+            renderBuilderExercises();
+        }
+
+        function closeRoutineBuilder() {
+            document.getElementById('routine-builder-view').classList.add('hidden');
+            document.getElementById('home-dashboard-view').classList.remove('hidden');
+            routineBuilderExercises = [];
+            editingRoutineId = null;
+        }
+
+        function renderBuilderExercises() {
+            const container = document.getElementById('builder-exercises-list');
+            container.innerHTML = '';
+
+            if (routineBuilderExercises.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-600 italic py-2 text-center border border-dashed border-slate-800 rounded">No exercises added yet.</p>`;
+                return;
+            }
+
+            routineBuilderExercises.forEach((ex, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded p-2.5 space-y-2 relative";
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-center pr-6">
+                        <span class="text-sm font-bold text-slate-200">${ex.name}</span>
+                        <button onclick="removeBuilderExercise(${idx})" class="absolute top-2.5 right-2.5 text-slate-500 hover:text-rose-500 text-xs font-bold w-5 h-5 flex items-center justify-center bg-slate-950 rounded">✕</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[9px] text-slate-500 uppercase tracking-wide">Tracking Metric</label>
+                            <select onchange="updateBuilderExercise(${idx}, 'metric', this.value)" class="w-full mt-0.5 text-xs bg-slate-950 border border-slate-800 text-slate-300 rounded px-1.5 py-1 focus:outline-none focus:border-indigo-500">
+                                <option value="weight_reps" ${ex.metric==='weight_reps'?'selected':''}>Barbell (lbs & reps)</option>
+                                <option value="dumbbell_reps" ${ex.metric==='dumbbell_reps'?'selected':''}>Dumbbell (lbs/hand)</option>
+                                <option value="bodyweight" ${ex.metric==='bodyweight'?'selected':''}>Bodyweight (reps)</option>
+                                <option value="time" ${ex.metric==='time'?'selected':''}>Time Only</option>
+                                <option value="distance_time" ${ex.metric==='distance_time'?'selected':''}>Distance & Time</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[9px] text-slate-500 uppercase tracking-wide">Link Group</label>
+                            <select onchange="updateBuilderExercise(${idx}, 'supersetGroup', this.value)" class="w-full mt-0.5 text-xs bg-slate-950 border border-slate-800 text-slate-300 rounded px-1.5 py-1 focus:outline-none focus:border-indigo-500">
+                                <option value="" ${ex.supersetGroup===''?'selected':''}>None</option>
+                                <option value="A" ${ex.supersetGroup==='A'?'selected':''}>Superset A</option>
+                                <option value="B" ${ex.supersetGroup==='B'?'selected':''}>Superset B</option>
+                                <option value="C" ${ex.supersetGroup==='C'?'selected':''}>Circuit C</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateBuilderExercise(idx, field, value) {
+            routineBuilderExercises[idx][field] = value;
+        }
+
+        function removeBuilderExercise(idx) {
+            routineBuilderExercises.splice(idx, 1);
+            renderBuilderExercises();
+        }
+
+        function saveRoutineTemplate() {
+            const name = document.getElementById('routine-name-input').value.trim();
+            if (!name) return alert("Please provide a template name.");
+            if (routineBuilderExercises.length === 0) return alert("Select at least one movement for this routine.");
+
+            let rtId = editingRoutineId || "rt-" + Date.now();
+            
+            const routineData = {
+                id: rtId,
+                name: name,
+                exercises: JSON.parse(JSON.stringify(routineBuilderExercises))
+            };
+
+            if (editingRoutineId) {
+                const index = appState.routines.findIndex(r => r.id === editingRoutineId);
+                if (index > -1) appState.routines[index] = routineData;
+                
+                // Clear old schedules for this edited routine before mapping new ones
+                Object.keys(appState.schedule).forEach(day => {
+                    if (appState.schedule[day] === rtId) appState.schedule[day] = "";
+                });
+            } else {
+                appState.routines.push(routineData);
+            }
+
+            // Map checkmarked days
+            document.querySelectorAll('.day-checkbox:checked').forEach(cb => appState.schedule[cb.value] = rtId);
+            
+            saveToStorage(); 
+            closeRoutineBuilder();
+            renderAllViews();
+        }
+
+        // ==========================================
+        // WORKOUT TRACKER EXECUTION (TAB 2)
+        // ==========================================
+        
+        // Updated Engine accepts array of configuration objects { name, metric, supersetGroup }
+        function startWorkoutEngine(title, exerciseConfigArray, originatingDay = "", routineTemplateId = "") {
+            appState.activeWorkout = { name: title, startTime: Date.now(), warmupMinutes: 0, originatingDay: originatingDay, routineTemplateId: routineTemplateId, exercises: [] };
+            
+            exerciseConfigArray.forEach(config => {
+                // Backwards compatibility check in case old string arrays leak through
+                let exName = typeof config === 'string' ? config : config.name;
+                let dictEntry = appState.exercises.find(e => e.name === exName) || { metric: 'weight_reps' };
+                
+                let setMetric = config.metric || dictEntry.metric;
+                let setGroup = config.supersetGroup || "";
+
+                const pastSets = getLastPerformanceData(exName); 
+                let blueprint = [];
+                
+                if (pastSets) {
+                    pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
+                } else {
+                    blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
+                }
+                
+                appState.activeWorkout.exercises.push({ name: exName, supersetGroup: setGroup, metric: setMetric, sets: blueprint });
+            });
+            
+            document.getElementById('active-workout-name').value = title; 
+            document.getElementById('warmup-display').innerText = "0 mins";
+            saveToStorage(); 
+            switchTab('workout');
         }
 
         // VISUAL LINKING & METRIC RENDERER
@@ -462,7 +626,6 @@
             });
 
             groupedExercises.forEach(group => {
-                const isInGroup = group[0].supersetGroup !== "";
                 let groupBorder = "border-slate-800";
                 if (group[0].supersetGroup === "A") groupBorder = "border-amber-500 border-l-4";
                 if (group[0].supersetGroup === "B") groupBorder = "border-cyan-500 border-l-4";
@@ -488,7 +651,7 @@
                         const past2 = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].v2 : '';
                         const checkedStateClass = set.isDone ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-400' : 'bg-slate-900 border-slate-700 text-slate-400';
 
-                        let input1Html = isBodyweight ? `<div class="col-span-4 flex items-center justify-center text-xs text-slate-600 bg-slate-900/30 rounded border border-slate-800 font-bold uppercase tracking-wide">Bodyweight</div>` : `
+                        let input1Html = isBodyweight ? `<div class="col-span-4 flex items-center justify-center text-[10px] text-slate-600 bg-slate-900/30 rounded border border-slate-800 font-bold uppercase tracking-wide">Bodyweight</div>` : `
                             <div class="col-span-4 flex items-center rounded border px-1.5 ${checkedStateClass}">
                                 <input type="number" step="any" placeholder="${past1 || '0'}" value="${set.v1}" oninput="updateSetData(${exIndex}, ${setIndex}, 'v1', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none text-xs font-semibold">
                                 <span class="text-[9px] text-slate-500 ml-0.5 whitespace-nowrap">${label1}</span>
@@ -525,11 +688,12 @@
                                 <div class="flex items-center space-x-2 flex-wrap gap-y-1"><h4 class="font-bold text-white text-sm leading-tight">${activeEx.name}</h4>${groupLabelHtml}</div>
                                 ${pastSets ? `<span class="text-[9px] text-emerald-400 block mt-0.5">${pastLabelText}</span>` : '<span class="text-[9px] text-slate-500 block mt-0.5">No metrics history</span>'}
                             </div>
+                            <!-- Inline linking edit allowed on the fly -->
                             <select onchange="updateExerciseGroup(${exIndex}, this.value)" class="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 rounded px-1 py-0.5 focus:outline-none">
-                                <option value="" ${activeEx.supersetGroup===''?'selected':''}>Link Group</option>
-                                <option value="A" ${activeEx.supersetGroup==='A'?'selected':''}>Superset A</option>
-                                <option value="B" ${activeEx.supersetGroup==='B'?'selected':''}>Superset B</option>
-                                <option value="C" ${activeEx.supersetGroup==='C'?'selected':''}>Circuit C</option>
+                                <option value="" ${activeEx.supersetGroup===''?'selected':''}>Link</option>
+                                <option value="A" ${activeEx.supersetGroup==='A'?'selected':''}>Grp A</option>
+                                <option value="B" ${activeEx.supersetGroup==='B'?'selected':''}>Grp B</option>
+                                <option value="C" ${activeEx.supersetGroup==='C'?'selected':''}>Grp C</option>
                             </select>
                         </div>
                         <div class="space-y-1">${setsHtml}</div>
@@ -555,15 +719,6 @@
         function addSetToActive(exIndex) { appState.activeWorkout.exercises[exIndex].sets.push({ v1: "", v2: "", isDone: false }); saveToStorage(); renderActiveWorkoutView(); }
         function removeSetFromActive(exIndex, setIndex) { appState.activeWorkout.exercises[exIndex].sets.splice(setIndex, 1); saveToStorage(); renderActiveWorkoutView(); }
         function removeExerciseFromActive(exIndex) { appState.activeWorkout.exercises.splice(exIndex, 1); saveToStorage(); renderActiveWorkoutView(); }
-
-        function addExerciseToActive(exerciseName) {
-            const dictEntry = appState.exercises.find(e => e.name === exerciseName) || { metric: 'weight_reps' };
-            const pastSets = getLastPerformanceData(exerciseName); let blueprint = [];
-            if (pastSets) pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
-            else blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
-            appState.activeWorkout.exercises.push({ name: exerciseName, supersetGroup: "", metric: dictEntry.metric, sets: blueprint });
-            saveToStorage(); closeAddExerciseModal(); renderActiveWorkoutView();
-        }
 
         // SAVE & ZERO REJECTION RULES
         function finishActiveWorkout() {
@@ -602,9 +757,57 @@
 
         function cancelActiveWorkout() { if (confirm("Discard session? All parameters will clear.")) { appState.activeWorkout = null; saveToStorage(); renderActiveWorkoutView(); } }
 
-        // DICTIONARY TAB
-        function changeDictionaryFilter(cat) { currentDictCategory = cat; renderCategoryPills('dictionary-filter-pills', currentDictCategory, 'changeDictionaryFilter'); renderExerciseDictionary(); }
+
+        // ==========================================
+        // MULTI-PURPOSE EXERCISE MODAL
+        // ==========================================
+        function openAddExerciseModal(target) { 
+            activeModalTarget = target;
+            document.getElementById('modal-helper-text').innerText = (target === 'routine') ? "Tapping inserts into template" : "Tapping inserts into tracking log";
+            document.getElementById('exercise-modal').classList.remove('hidden'); 
+            currentModalCategory = "All"; 
+            renderCategoryPills('modal-filter-pills', currentModalCategory, 'changeModalFilter'); 
+            renderModalExercises(); 
+        }
+        function closeAddExerciseModal() { 
+            document.getElementById('exercise-modal').classList.add('hidden'); 
+            document.getElementById('modal-search').value = ''; 
+        }
+
+        function handleModalExerciseSelection(name) {
+            const dictEntry = appState.exercises.find(e => e.name === name) || { metric: 'weight_reps' };
+            
+            if (activeModalTarget === 'workout') {
+                const pastSets = getLastPerformanceData(name); let blueprint = [];
+                if (pastSets) pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
+                else blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
+                appState.activeWorkout.exercises.push({ name: name, supersetGroup: "", metric: dictEntry.metric, sets: blueprint });
+                saveToStorage(); renderActiveWorkoutView();
+            } else if (activeModalTarget === 'routine') {
+                routineBuilderExercises.push({ name: name, metric: dictEntry.metric, supersetGroup: "" });
+                renderBuilderExercises();
+            }
+            closeAddExerciseModal(); 
+        }
+
         function changeModalFilter(cat) { currentModalCategory = cat; renderCategoryPills('modal-filter-pills', currentModalCategory, 'changeModalFilter'); renderModalExercises(); }
+        
+        function renderModalExercises() {
+            const container = document.getElementById('modal-list'); const term = document.getElementById('modal-search').value.toLowerCase(); container.innerHTML = '';
+            let filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(term));
+            if (currentModalCategory !== "All") filtered = filtered.filter(e => e.category === currentModalCategory);
+            filtered.sort((a,b)=>a.name.localeCompare(b.name)).forEach(e => {
+                const btn = document.createElement('button'); btn.className = "w-full text-left py-2.5 px-3 bg-slate-800 border border-slate-700/60 text-slate-200 rounded-xl text-xs flex justify-between items-center mb-1";
+                btn.onclick = () => handleModalExerciseSelection(e.name); btn.innerHTML = `<span>${e.name}</span> <span class="text-[9px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full">${e.category}</span>`;
+                container.appendChild(btn);
+            });
+        }
+
+
+        // ==========================================
+        // DICTIONARY TAB
+        // ==========================================
+        function changeDictionaryFilter(cat) { currentDictCategory = cat; renderCategoryPills('dictionary-filter-pills', currentDictCategory, 'changeDictionaryFilter'); renderExerciseDictionary(); }
         
         function renderCategoryPills(containerId, activeCat, functionName) {
             const container = document.getElementById(containerId); container.innerHTML = '';
@@ -641,25 +844,19 @@
             if (!name) return alert("Enter a workout name configuration.");
             if (appState.exercises.some(e => e.name.toLowerCase() === name.toLowerCase())) return alert("Name conflict row already exists.");
             appState.exercises.push({ id: "custom-" + Date.now(), name: name, category: cat, metric: metric }); saveToStorage();
-            document.getElementById('new-exercise-name').value = ''; renderExerciseDictionary(); renderRoutinePickers();
+            document.getElementById('new-exercise-name').value = ''; renderExerciseDictionary();
         }
 
-        function quickStartExercise(name) { if (!appState.activeWorkout) startWorkoutEngine(`Focus - ${name}`, [name]); else addExerciseToActive(name); switchTab('workout'); }
-        function openAddExerciseModal() { document.getElementById('exercise-modal').classList.remove('hidden'); currentModalCategory = "All"; renderCategoryPills('modal-filter-pills', currentModalCategory, 'changeModalFilter'); renderModalExercises(); }
-        function closeAddExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); document.getElementById('modal-search').value = ''; }
-
-        function renderModalExercises() {
-            const container = document.getElementById('modal-list'); const term = document.getElementById('modal-search').value.toLowerCase(); container.innerHTML = '';
-            let filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(term));
-            if (currentModalCategory !== "All") filtered = filtered.filter(e => e.category === currentModalCategory);
-            filtered.sort((a,b)=>a.name.localeCompare(b.name)).forEach(e => {
-                const btn = document.createElement('button'); btn.className = "w-full text-left py-2.5 px-3 bg-slate-800 border border-slate-700/60 text-slate-200 rounded-xl text-xs flex justify-between items-center mb-1";
-                btn.onclick = () => addExerciseToActive(e.name); btn.innerHTML = `<span>${e.name}</span> <span class="text-[9px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full">${e.category}</span>`;
-                container.appendChild(btn);
-            });
+        function quickStartExercise(name) { 
+            const dictEntry = appState.exercises.find(e => e.name === name) || { metric: 'weight_reps' };
+            if (!appState.activeWorkout) startWorkoutEngine(`Focus - ${name}`, [{name: name, metric: dictEntry.metric, supersetGroup: ''}]); 
+            else { activeModalTarget = 'workout'; handleModalExerciseSelection(name); }
+            switchTab('workout'); 
         }
 
+        // ==========================================
         // HISTORY TAB
+        // ==========================================
         function renderHistoryLogView() {
             const listContainer = document.getElementById('history-list'); const emptyLabel = document.getElementById('history-empty'); listContainer.innerHTML = '';
             if (!appState.history || appState.history.length === 0) { emptyLabel.classList.remove('hidden'); return; }
