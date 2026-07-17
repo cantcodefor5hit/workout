@@ -15,7 +15,8 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased overflow-hidden">
 
-    <div class="max-w-md mx-auto h-screen flex flex-col bg-slate-900 shadow-2xl relative">
+    <!-- CHANGED h-screen to h-[100dvh] TO FIX CHROME BROWSER BAR OVERLAP -->
+    <div class="max-w-md mx-auto h-[100dvh] flex flex-col bg-slate-900 shadow-2xl relative">
         
         <!-- HEADER -->
         <header class="bg-slate-950/90 backdrop-blur border-b border-slate-800 p-4 shrink-0 flex justify-between items-center z-40">
@@ -244,11 +245,9 @@
             activeWorkout: null
         };
 
-        // NEW BUILDER STATE MANAGEMENT
         let routineBuilderExercises = [];
         let editingRoutineId = null;
-        let activeModalTarget = 'workout'; // Can be 'workout' or 'routine'
-
+        let activeModalTarget = 'workout'; 
         let currentDictCategory = "All";
         let currentModalCategory = "All";
         let restTimerInterval = null;
@@ -282,7 +281,6 @@
             setupTimerLoop();
         });
 
-        // Version 6 handles the structural routine array schema upgrade
         function saveToStorage() { localStorage.setItem('workout_app_v6_state', JSON.stringify(appState)); }
 
         function loadFromStorage() {
@@ -325,9 +323,7 @@
             const titles = { 'home': 'Home Dashboard', 'workout': 'Track Session', 'exercises': 'App Dictionary', 'history': 'Performance History' };
             document.getElementById('page-title').innerText = titles[tabId];
             
-            // Close builder if navigating away
             if(tabId !== 'home') closeRoutineBuilder();
-            
             renderAllViews();
         }
 
@@ -463,7 +459,6 @@
             if(!rt) return;
 
             editingRoutineId = rtId;
-            // Deep copy existing config objects to prevent live mutation before saving
             routineBuilderExercises = JSON.parse(JSON.stringify(rt.exercises)); 
             document.getElementById('routine-name-input').value = rt.name;
             
@@ -475,7 +470,6 @@
             document.getElementById('home-dashboard-view').classList.add('hidden');
             document.getElementById('routine-builder-view').classList.remove('hidden');
             
-            // Auto scroll to top where builder is
             document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
             renderBuilderExercises();
         }
@@ -556,8 +550,6 @@
             if (editingRoutineId) {
                 const index = appState.routines.findIndex(r => r.id === editingRoutineId);
                 if (index > -1) appState.routines[index] = routineData;
-                
-                // Clear old schedules for this edited routine before mapping new ones
                 Object.keys(appState.schedule).forEach(day => {
                     if (appState.schedule[day] === rtId) appState.schedule[day] = "";
                 });
@@ -565,7 +557,6 @@
                 appState.routines.push(routineData);
             }
 
-            // Map checkmarked days
             document.querySelectorAll('.day-checkbox:checked').forEach(cb => appState.schedule[cb.value] = rtId);
             
             saveToStorage(); 
@@ -576,38 +567,26 @@
         // ==========================================
         // WORKOUT TRACKER EXECUTION (TAB 2)
         // ==========================================
-        
-        // Updated Engine accepts array of configuration objects { name, metric, supersetGroup }
         function startWorkoutEngine(title, exerciseConfigArray, originatingDay = "", routineTemplateId = "") {
             appState.activeWorkout = { name: title, startTime: Date.now(), warmupMinutes: 0, originatingDay: originatingDay, routineTemplateId: routineTemplateId, exercises: [] };
             
             exerciseConfigArray.forEach(config => {
-                // Backwards compatibility check in case old string arrays leak through
                 let exName = typeof config === 'string' ? config : config.name;
                 let dictEntry = appState.exercises.find(e => e.name === exName) || { metric: 'weight_reps' };
-                
                 let setMetric = config.metric || dictEntry.metric;
                 let setGroup = config.supersetGroup || "";
 
-                const pastSets = getLastPerformanceData(exName); 
-                let blueprint = [];
-                
-                if (pastSets) {
-                    pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
-                } else {
-                    blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
-                }
+                const pastSets = getLastPerformanceData(exName); let blueprint = [];
+                if (pastSets) pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
+                else blueprint = [{ v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }, { v1: "", v2: "", isDone: false }];
                 
                 appState.activeWorkout.exercises.push({ name: exName, supersetGroup: setGroup, metric: setMetric, sets: blueprint });
             });
             
-            document.getElementById('active-workout-name').value = title; 
-            document.getElementById('warmup-display').innerText = "0 mins";
-            saveToStorage(); 
-            switchTab('workout');
+            document.getElementById('active-workout-name').value = title; document.getElementById('warmup-display').innerText = "0 mins";
+            saveToStorage(); switchTab('workout');
         }
 
-        // VISUAL LINKING & METRIC RENDERER
         function renderActiveWorkoutView() {
             const noActiveView = document.getElementById('no-active-workout'); const activeContainer = document.getElementById('active-workout-container');
             const listContainer = document.getElementById('active-exercises-list');
@@ -615,7 +594,6 @@
             if (!appState.activeWorkout) { noActiveView.classList.remove('hidden'); activeContainer.classList.add('hidden'); document.getElementById('active-workout-indicator').classList.add('hidden'); return; }
             noActiveView.classList.add('hidden'); activeContainer.classList.remove('hidden'); document.getElementById('active-workout-indicator').classList.remove('hidden'); listContainer.innerHTML = '';
 
-            // Group processing for SuperSets/Circuits Linking
             const groupedExercises = [];
             appState.activeWorkout.exercises.forEach((ex, idx) => {
                 ex._originalIndex = idx; 
@@ -638,7 +616,6 @@
                     const exIndex = activeEx._originalIndex;
                     const pastSets = getLastPerformanceData(activeEx.name);
 
-                    // Dynamic Metrics Handling
                     let label1 = "lbs"; let label2 = "reps"; let isBodyweight = false;
                     if(activeEx.metric === "time") { label1 = "mins"; label2 = "secs"; }
                     else if(activeEx.metric === "distance_time") { label1 = "miles"; label2 = "mins"; }
@@ -679,7 +656,6 @@
                     const borderBottom = groupIndex < group.length - 1 ? 'border-b border-slate-900/50' : '';
                     const exDiv = document.createElement('div');
                     exDiv.className = `p-3 space-y-2 transition-all ${borderBottom}`;
-                    
                     let pastLabelText = isBodyweight ? `✨ Match: S1 (${pastSets?.[0]?.v2} ${label2})` : `✨ Match: S1 (${pastSets?.[0]?.v1} ${label1} x ${pastSets?.[0]?.v2} ${label2})`;
 
                     exDiv.innerHTML = `
@@ -688,7 +664,6 @@
                                 <div class="flex items-center space-x-2 flex-wrap gap-y-1"><h4 class="font-bold text-white text-sm leading-tight">${activeEx.name}</h4>${groupLabelHtml}</div>
                                 ${pastSets ? `<span class="text-[9px] text-emerald-400 block mt-0.5">${pastLabelText}</span>` : '<span class="text-[9px] text-slate-500 block mt-0.5">No metrics history</span>'}
                             </div>
-                            <!-- Inline linking edit allowed on the fly -->
                             <select onchange="updateExerciseGroup(${exIndex}, this.value)" class="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 rounded px-1 py-0.5 focus:outline-none">
                                 <option value="" ${activeEx.supersetGroup===''?'selected':''}>Link</option>
                                 <option value="A" ${activeEx.supersetGroup==='A'?'selected':''}>Grp A</option>
@@ -720,7 +695,6 @@
         function removeSetFromActive(exIndex, setIndex) { appState.activeWorkout.exercises[exIndex].sets.splice(setIndex, 1); saveToStorage(); renderActiveWorkoutView(); }
         function removeExerciseFromActive(exIndex) { appState.activeWorkout.exercises.splice(exIndex, 1); saveToStorage(); renderActiveWorkoutView(); }
 
-        // SAVE & ZERO REJECTION RULES
         function finishActiveWorkout() {
             if (!appState.activeWorkout || appState.activeWorkout.exercises.length === 0) return alert("Add at least one exercise before completing.");
             const cleanLoggedExercises = [];
@@ -757,7 +731,6 @@
 
         function cancelActiveWorkout() { if (confirm("Discard session? All parameters will clear.")) { appState.activeWorkout = null; saveToStorage(); renderActiveWorkoutView(); } }
 
-
         // ==========================================
         // MULTI-PURPOSE EXERCISE MODAL
         // ==========================================
@@ -769,14 +742,10 @@
             renderCategoryPills('modal-filter-pills', currentModalCategory, 'changeModalFilter'); 
             renderModalExercises(); 
         }
-        function closeAddExerciseModal() { 
-            document.getElementById('exercise-modal').classList.add('hidden'); 
-            document.getElementById('modal-search').value = ''; 
-        }
+        function closeAddExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); document.getElementById('modal-search').value = ''; }
 
         function handleModalExerciseSelection(name) {
             const dictEntry = appState.exercises.find(e => e.name === name) || { metric: 'weight_reps' };
-            
             if (activeModalTarget === 'workout') {
                 const pastSets = getLastPerformanceData(name); let blueprint = [];
                 if (pastSets) pastSets.forEach(s => blueprint.push({ v1: s.v1, v2: s.v2, isDone: false }));
@@ -803,7 +772,6 @@
             });
         }
 
-
         // ==========================================
         // DICTIONARY TAB
         // ==========================================
@@ -824,7 +792,6 @@
             const container = document.getElementById('dictionary-list'); const searchVal = document.getElementById('exercise-search').value.toLowerCase(); container.innerHTML = '';
             let filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(searchVal));
             if (currentDictCategory !== "All") filtered = filtered.filter(e => e.category === currentDictCategory);
-
             const categories = [...new Set(filtered.map(e => e.category))].sort();
             if (filtered.length === 0) { container.innerHTML = `<p class="text-center py-6 text-xs text-slate-500">No exercise rows match.</p>`; return; }
 
