@@ -159,6 +159,8 @@
                         <select id="new-exercise-metric" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none">
                             <option value="weight_reps">Barbell (lbs & reps)</option>
                             <option value="dumbbell_reps">Dumbbell (lbs/hand)</option>
+                            <option value="machine_weight_reps">Machine/Cable (lbs & reps)</option>
+                            <option value="dumbbell_time">Dumbbell & Time (lbs & secs)</option>
                             <option value="bodyweight">Bodyweight (reps)</option>
                             <option value="time">Time Only (mins/secs)</option>
                             <option value="distance_time">Distance & Time</option>
@@ -261,6 +263,8 @@
                     <select id="modal-new-ex-metric" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none">
                         <option value="weight_reps">Barbell (lbs & reps)</option>
                         <option value="dumbbell_reps">Dumbbell (lbs/hand)</option>
+                        <option value="machine_weight_reps">Machine/Cable (lbs & reps)</option>
+                        <option value="dumbbell_time">Dumbbell & Time (lbs & secs)</option>
                         <option value="bodyweight">Bodyweight (reps)</option>
                         <option value="time">Time Only (mins/secs)</option>
                         <option value="distance_time">Distance & Time</option>
@@ -299,10 +303,10 @@
             { id: "img-5", name: "One-Arm Rows", category: "Back", metric: "dumbbell_reps" },
             { id: "img-6", name: "Triceps Extension", category: "Arms", metric: "dumbbell_reps" },
             { id: "img-7", name: "Wrist Roller", category: "Arms", metric: "weight_reps" },
-            { id: "img-8", name: "Lat Pull-Downs", category: "Back", metric: "weight_reps" },
+            { id: "img-8", name: "Lat Pull-Downs", category: "Back", metric: "machine_weight_reps" },
             { id: "img-9", name: "Bench Press", category: "Chest", metric: "weight_reps" },
-            { id: "img-10", name: "Leg Extension", category: "Legs", metric: "weight_reps" },
-            { id: "img-11", name: "Leg Curl", category: "Legs", metric: "weight_reps" },
+            { id: "img-10", name: "Leg Extension", category: "Legs", metric: "machine_weight_reps" },
+            { id: "img-11", name: "Leg Curl", category: "Legs", metric: "machine_weight_reps" },
             { id: "img-12", name: "Swimmers", category: "Stretching & Warm-up", metric: "time" },
             { id: "img-13", name: "Crunches", category: "Core", metric: "bodyweight" },
             { id: "se-2", name: "Deadlift (Barbell)", category: "Legs", metric: "weight_reps" },
@@ -362,7 +366,7 @@
                             pr = { v1: p1, v2: p2 };
                             prDate = log.date;
                         } else {
-                            if (metric === 'weight_reps' || metric === 'dumbbell_reps') {
+                            if (metric === 'weight_reps' || metric === 'dumbbell_reps' || metric === 'machine_weight_reps' || metric === 'dumbbell_time') {
                                 if (p1 > pr.v1 || (p1 === pr.v1 && p2 > pr.v2)) { pr = {v1: p1, v2: p2}; prDate = log.date; }
                             } else if (metric === 'bodyweight') {
                                 if (p2 > pr.v2) { pr = {v1: 0, v2: p2}; prDate = log.date; }
@@ -505,7 +509,6 @@
                 const isToday = (day === currentDayStr);
                 
                 const dayContainer = document.createElement('div');
-                // Strict, highly compact horizontal layout for every single day
                 dayContainer.className = `flex items-center p-2 rounded-xl border h-14 ${isToday ? 'bg-indigo-950/20 border-indigo-500/40 shadow-sm' : 'bg-slate-950 border-slate-800'}`;
                 
                 let routinesHtml = '';
@@ -516,7 +519,6 @@
                         const foundRoutine = appState.routines.find(r => r.id === targetRoutineId);
                         if (foundRoutine) {
                             let isFinishedThisWeek = appState.history.some(log => log.originatingDay === day && log.routineTemplateId === targetRoutineId && isLogFromCurrentWeek(log.date));
-                            // Horizontally scrolling pill buttons for multiple routines
                             routinesHtml += `<button onclick="startWorkoutEngine('${foundRoutine.name}', ${JSON.stringify(foundRoutine.exercises).replace(/"/g, '&quot;')}, '${day}', '${foundRoutine.id}')" class="shrink-0 flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition ${isFinishedThisWeek ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-400' : 'bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500'} text-[10px] font-bold shadow-sm">
                                 <span>${foundRoutine.name}</span>
                                 ${isFinishedThisWeek ? '<span>✓</span>' : '<span>▶</span>'}
@@ -599,6 +601,8 @@
                             <select onchange="updateBuilderExercise(${idx}, 'metric', this.value)" class="w-full mt-0.5 text-xs bg-slate-950 border border-slate-800 text-slate-300 rounded px-1.5 py-1 focus:outline-none focus:border-indigo-500">
                                 <option value="weight_reps" ${ex.metric==='weight_reps'?'selected':''}>Barbell (lbs & reps)</option>
                                 <option value="dumbbell_reps" ${ex.metric==='dumbbell_reps'?'selected':''}>Dumbbell (lbs/hand)</option>
+                                <option value="machine_weight_reps" ${ex.metric==='machine_weight_reps'?'selected':''}>Machine/Cable (lbs & reps)</option>
+                                <option value="dumbbell_time" ${ex.metric==='dumbbell_time'?'selected':''}>Dumbbell & Time (lbs & secs)</option>
                                 <option value="bodyweight" ${ex.metric==='bodyweight'?'selected':''}>Bodyweight (reps)</option>
                                 <option value="time" ${ex.metric==='time'?'selected':''}>Time Only</option>
                                 <option value="distance_time" ${ex.metric==='distance_time'?'selected':''}>Distance & Time</option>
@@ -699,6 +703,7 @@
                         else if (activeEx.metric === 'time') prText = `🏆 PR: ${pr.v1}m ${pr.v2}s (${pr.date})`;
                         else if (activeEx.metric === 'distance_time') prText = `🏆 PR: ${pr.v1} mi in ${pr.v2}m (${pr.date})`;
                         else if (activeEx.metric === 'dumbbell_reps') prText = `🏆 PR: ${pr.v1} lbs/h x ${pr.v2} (${pr.date})`;
+                        else if (activeEx.metric === 'dumbbell_time') prText = `🏆 PR: ${pr.v1} lbs/h x ${pr.v2}s (${pr.date})`;
                         else prText = `🏆 PR: ${pr.v1} lbs x ${pr.v2} (${pr.date})`;
                     }
                     let prBadgeHtml = prText ? `<div class="mt-1"><span class="text-[9px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded shadow-sm inline-block">${prText}</span></div>` : '';
@@ -708,6 +713,8 @@
                     else if(activeEx.metric === "distance_time") { label1 = "miles"; label2 = "mins"; }
                     else if(activeEx.metric === "dumbbell_reps") { label1 = "lbs/hand"; label2 = "reps"; }
                     else if(activeEx.metric === "bodyweight") { isBodyweight = true; label2 = "reps"; }
+                    else if(activeEx.metric === "machine_weight_reps") { label1 = "lbs"; label2 = "reps"; }
+                    else if(activeEx.metric === "dumbbell_time") { label1 = "lbs/hand"; label2 = "secs"; }
 
                     let setsHtml = '';
                     activeEx.sets.forEach((set, setIndex) => {
@@ -781,7 +788,6 @@
 
         function updateExerciseGroup(exIndex, groupValue) { appState.activeWorkout.exercises[exIndex].supersetGroup = groupValue; saveToStorage(); renderActiveWorkoutView(); }
         
-        // NEW COPY ABOVE PREPOPULATION LOGIC
         function addSetToActive(exIndex) { 
             const ex = appState.activeWorkout.exercises[exIndex];
             let lastV1 = ""; 
@@ -973,6 +979,8 @@
                     else if(ex.metric === "distance_time") { label1 = "mi"; label2 = "m"; }
                     else if(ex.metric === "dumbbell_reps") { label1 = "lbs/h"; label2 = "reps"; }
                     else if(ex.metric === "bodyweight") { isBw = true; label2 = "reps"; }
+                    else if(ex.metric === "machine_weight_reps") { label1 = "lbs"; label2 = "reps"; }
+                    else if(ex.metric === "dumbbell_time") { label1 = "lbs/h"; label2 = "s"; }
 
                     let setTokens = ex.sets.map(s => isBw ? `${s.v2} ${label2}` : `${s.v1}${label1} x ${s.v2}${label2}`).join(', ');
                     let groupTag = ex.supersetGroup ? `<span class="text-[9px] border border-slate-700 bg-slate-900 text-slate-400 px-1 rounded mr-1">Link ${ex.supersetGroup}</span>` : "";
