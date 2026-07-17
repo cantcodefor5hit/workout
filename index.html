@@ -4,22 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Custom Workout Tracker</title>
-    <!-- Tailwind CSS for a modern, sleek mobile layout -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Prevents elastic scrolling glitches on mobile devices */
         body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-indigo-500">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased">
 
     <div class="max-w-md mx-auto min-h-screen flex flex-col bg-slate-900 shadow-2xl pb-24">
         
         <!-- HEADER -->
         <header class="bg-slate-950/80 backdrop-blur border-b border-slate-800 p-4 sticky top-0 z-40 flex justify-between items-center">
-            <h1 id="page-title" class="text-xl font-bold tracking-tight text-indigo-400">Today's Training</h1>
+            <h1 id="page-title" class="text-xl font-bold tracking-tight text-indigo-400">Weekly Schedule</h1>
             <div id="active-workout-indicator" class="hidden text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full font-medium border border-emerald-500/30 animate-pulse">
                 Workout Live
             </div>
@@ -28,19 +26,53 @@
         <!-- MAIN CONTAINER -->
         <main class="flex-1 p-4 overflow-y-auto">
 
-            <!-- TAB 1: SCHEDULE / TODAY -->
+            <!-- TAB 1: WEEKLY PLANNER & ROUTINE CREATOR -->
             <div id="tab-today" class="tab-content active space-y-6">
-                <div class="bg-gradient-to-br from-indigo-900/40 to-slate-800/40 border border-indigo-500/20 rounded-2xl p-4">
-                    <h2 class="text-sm font-semibold tracking-wider uppercase text-indigo-400">Scheduled for Today</h2>
-                    <div id="today-scheduled-view" class="mt-2 text-slate-300">
-                        <!-- Dynamic scheduling loadout -->
+                <!-- Weekly Schedule Dashboard Grid -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Overview</h3>
+                    <div id="weekly-dashboard-grid" class="space-y-2">
+                        <!-- Filled Dynamically by JavaScript Loop -->
                     </div>
                 </div>
 
-                <div>
-                    <h3 class="text-md font-semibold text-slate-400 mb-3">Weekly Schedule Planner</h3>
-                    <div id="weekly-scheduler-list" class="space-y-2">
-                        <!-- Filled by JS -->
+                <!-- Custom Routine Management Panel -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
+                    <h3 class="font-bold text-sm uppercase tracking-wider text-indigo-400">Create Weekly Routine</h3>
+                    <div class="space-y-3">
+                        <input id="routine-name-input" type="text" placeholder="Routine Name (e.g., Push Day)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                        
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 mb-1.5">Select Recurring Training Days:</p>
+                            <div class="flex flex-wrap gap-1.5 text-xs">
+                                    <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Mon" class="day-checkbox"> <span>Mon</span></label>
+                                    <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Tue" class="day-checkbox"> <span>Tue</span></label>
+                                    <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Wed" class="day-checkbox"> <span>Wed</span></label>
+                                    <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Thu" class="day-checkbox"> <span>Thu</span></label>
+                                    <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Fri" class="day-checkbox"> <span>Fri</span></label>
+                                    <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Sat" class="day-checkbox"> <span>Sat</span></label>
+                                    <label class="bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-md flex items-center space-x-1.5"><input type="checkbox" value="Sun" class="day-checkbox"> <span>Sun</span></label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 mb-1.5">Select Routine Movements:</p>
+                            <div id="routine-exercise-picker" class="max-h-40 overflow-y-auto border border-slate-800 rounded-lg p-2 space-y-1 bg-slate-900/50 text-xs">
+                                <!-- Populated dynamically with exercise choices -->
+                            </div>
+                        </div>
+
+                        <button onclick="saveCustomRoutine()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition shadow-lg shadow-indigo-600/10">
+                            Save Routine Template
+                        </button>
+                    </div>
+                </div>
+
+                <!-- List of Existing Created Routines -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Your Routine Blueprints</h4>
+                    <div id="created-routines-list" class="space-y-2">
+                        <!-- Dynamic list generated from state array -->
                     </div>
                 </div>
             </div>
@@ -48,32 +80,43 @@
             <!-- TAB 2: ACTIVE WORKOUT TRACKER -->
             <div id="tab-workout" class="tab-content space-y-4">
                 <div id="no-active-workout" class="text-center py-12 space-y-4">
-                    <p class="text-slate-400">No active workout session running.</p>
-                    <button onclick="startFreestyleWorkout()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition shadow-lg shadow-indigo-600/20 active:scale-95">
+                    <p class="text-slate-400">No active tracking session running.</p>
+                    <button onclick="startWorkoutEngine('Freestyle Session', [])" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition shadow-lg">
                         ⚡ Start Empty Workout
                     </button>
-                    <p class="text-xs text-slate-500">Or tap a routine from the Today tab or an exercise below.</p>
                 </div>
 
-                <div id="active-workout-container" class="hidden space-y-6">
-                    <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
-                        <input id="active-workout-name" type="text" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 text-lg font-bold text-white focus:outline-none px-1 py-0.5" value="Freestyle Workout">
-                        <span id="workout-timer" class="text-sm font-mono text-slate-400">00:00</span>
+                <div id="active-workout-container" class="hidden space-y-5">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <input id="active-workout-name" type="text" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 text-base font-bold text-white focus:outline-none px-1 py-0.5" value="Freestyle Session">
+                            <span id="workout-timer" class="text-sm font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">00:00</span>
+                        </div>
+                        
+                        <!-- NEW WORKOUT WARM UP EXTRACTION PANEL -->
+                        <div class="flex items-center justify-between bg-slate-900/60 p-2 rounded-lg border border-slate-800 text-xs">
+                            <span class="text-slate-400 font-medium">⏱️ Warm-up Duration:</span>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="adjustWarmup(-5)" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-300 font-bold">-5m</button>
+                                <span id="warmup-display" class="font-mono text-indigo-400 font-bold w-12 text-center">0 mins</span>
+                                <button onclick="adjustWarmup(5)" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-300 font-bold">+5m</button>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="active-exercises-list" class="space-y-4">
-                        <!-- Active exercises go here dynamically -->
+                        <!-- Populated elements handled via app state loop -->
                     </div>
 
-                    <div class="space-y-3 pt-4">
-                        <button onclick="openAddExerciseModal()" class="w-full py-2.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 font-medium rounded-xl transition text-sm">
+                    <div class="space-y-3 pt-2">
+                        <button onclick="openAddExerciseModal()" class="w-full py-2.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 font-medium rounded-xl text-sm">
                             ➕ Add Exercise to This Workout
                         </button>
                         <div class="grid grid-cols-2 gap-3">
                             <button onclick="cancelActiveWorkout()" class="py-3 bg-slate-800 border border-slate-700 text-rose-400 font-medium rounded-xl text-sm transition active:scale-95">
-                                Cancel Session
+                                Discard
                             </button>
-                            <button onclick="finishActiveWorkout()" class="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-600/20 active:scale-95">
+                            <button onclick="finishActiveWorkout()" class="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg active:scale-95">
                                 Finish Workout
                             </button>
                         </div>
@@ -81,20 +124,20 @@
                 </div>
             </div>
 
-            <!-- TAB 3: EXERCISE DICTIONARY -->
+            <!-- TAB 3: EXTENSIVE EXERCISE DICTIONARY -->
             <div id="tab-exercises" class="tab-content space-y-4">
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <h3 class="font-bold text-sm uppercase tracking-wider text-indigo-400">Add Missing Custom Exercise</h3>
+                    <h3 class="font-bold text-sm uppercase tracking-wider text-indigo-400">Add Custom Exercise</h3>
                     <div class="grid grid-cols-1 gap-2">
                         <input id="new-exercise-name" type="text" placeholder="Exercise Name (e.g., Deficit Deadlift)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
-                        <select id="new-exercise-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <select id="new-exercise-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none">
                             <option value="Legs">Legs</option>
                             <option value="Chest">Chest</option>
                             <option value="Back">Back</option>
                             <option value="Shoulders">Shoulders</option>
                             <option value="Arms">Arms</option>
                             <option value="Core">Core</option>
-                            <option value="Mobility/Other">Mobility / Other</option>
+                            <option value="Stretching & Warm-up">Stretching & Warm-up</option>
                         </select>
                         <button onclick="addNewCustomExercise()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition">
                             Save into App Database
@@ -106,18 +149,18 @@
                     <input id="exercise-search" type="text" oninput="renderExerciseDictionary()" placeholder="Search library..." class="w-full pl-3 pr-10 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                 </div>
 
-                <div id="dictionary-list" class="space-y-2">
-                    <!-- Complete exercise directory list -->
+                <div id="dictionary-list" class="space-y-4">
+                    <!-- Loaded dynamically via deep array layout -->
                 </div>
             </div>
 
             <!-- TAB 4: WORKOUT LOG HISTORY -->
             <div id="tab-history" class="tab-content space-y-4">
                 <div id="history-empty" class="text-center py-12 text-slate-500 text-sm hidden">
-                    No logged workouts found. Complete your first session to see records here.
+                    No logged workouts found.
                 </div>
                 <div id="history-list" class="space-y-4">
-                    <!-- Historical list of logs -->
+                    <!-- Complete historical logging elements -->
                 </div>
             </div>
 
@@ -144,7 +187,7 @@
         </nav>
     </div>
 
-    <!-- MODAL POPUP FOR SELECTING MOVEMENT INSIDE ACTIVE TRACKER -->
+    <!-- EXERCISE SELECTION SECTOR MODAL SCREEN -->
     <div id="exercise-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-end justify-center">
         <div class="bg-slate-900 w-full max-w-md border-t border-slate-800 rounded-t-2xl p-4 space-y-4 max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center">
@@ -158,71 +201,104 @@
         </div>
     </div>
 
-    <!-- MAIN JAVASCRIPT APP CONFIGURATION INTERACTION ENGINE -->
+    <!-- ENGINE CODE LOGIC HANDLING STATE STORAGE AND UI CONTEXT -->
     <script>
-        // CORE STATE DATA MANAGEMENT SETUP
         let appState = {
             exercises: [],
+            routines: [],
             history: [],
             schedule: { "Mon": "", "Tue": "", "Wed": "", "Thu": "", "Fri": "", "Sat": "", "Sun": "" },
             activeWorkout: null
         };
 
-        // Seed comprehensive foundational movement dictionary
+        // TRIPLED SEEDED DATABASE INCLUDING STRETCHING AND WARM UP TARGETS
         const standardExercises = [
-            { id: "ex-1", name: "Squat (Barbell)", category: "Legs", isCustom: false },
-            { id: "ex-2", name: "Bench Press (Barbell)", category: "Chest", isCustom: false },
-            { id: "ex-3", name: "Deadlift (Barbell)", category: "Legs", isCustom: false },
-            { id: "ex-4", name: "Overhead Press (Barbell)", category: "Shoulders", isCustom: false },
-            { id: "ex-5", name: "Pull-Up", category: "Back", isCustom: false },
-            { id: "ex-6", name: "Push-Up", category: "Chest", isCustom: false },
-            { id: "ex-7", name: "Barbell Row", category: "Back", isCustom: false },
-            { id: "ex-8", name: "Dumbbell Bicep Curl", category: "Arms", isCustom: false },
-            { id: "ex-9", name: "Tricep Overhead Extension", category: "Arms", isCustom: false },
-            { id: "ex-10", name: "Lateral Raise (Dumbbell)", category: "Shoulders", isCustom: false },
-            { id: "ex-11", name: "Leg Press", category: "Legs", isCustom: false },
-            { id: "ex-12", name: "Romanian Deadlift (Barbell)", category: "Legs", isCustom: false },
-            { id: "ex-13", name: "Bulgarian Split Squat", category: "Legs", isCustom: false },
-            { id: "ex-14", name: "Lat Pulldown", category: "Back", isCustom: false },
-            { id: "ex-15", name: "Incline Dumbbell Press", category: "Chest", isCustom: false },
-            { id: "ex-16", name: "Plank", category: "Core", isCustom: false },
-            { id: "ex-17", name: "Hanging Leg Raise", category: "Core", isCustom: false },
-            { id: "ex-18", name: "Dips", category: "Chest", isCustom: false },
-            { id: "ex-19", name: "Face Pull", category: "Shoulders", isCustom: false },
-            { id: "ex-20", name: "Foam Rolling & Mobility", category: "Mobility/Other", isCustom: false }
+            // LEGS
+            { id: "se-1", name: "Squat (Barbell)", category: "Legs" },
+            { id: "se-2", name: "Deadlift (Barbell)", category: "Legs" },
+            { id: "se-3", name: "Romanian Deadlift (Barbell)", category: "Legs" },
+            { id: "se-4", name: "Bulgarian Split Squat", category: "Legs" },
+            { id: "se-5", name: "Leg Press", category: "Legs" },
+            { id: "se-6", name: "Leg Curl (Seated)", category: "Legs" },
+            { id: "se-7", name: "Leg Extension", category: "Legs" },
+            { id: "se-8", name: "Calf Raise (Standing)", category: "Legs" },
+            { id: "se-9", name: "Goblet Squat (Dumbbell)", category: "Legs" },
+            { id: "se-10", name: "Lunge (Dumbbell)", category: "Legs" },
+            // CHEST
+            { id: "se-11", name: "Bench Press (Barbell)", category: "Chest" },
+            { id: "se-12", name: "Incline Dumbbell Press", category: "Chest" },
+            { id: "se-13", name: "Dumbbell Flye", category: "Chest" },
+            { id: "se-14", name: "Push-Up", category: "Chest" },
+            { id: "se-15", name: "Dip (Chest Focus)", category: "Chest" },
+            { id: "se-16", name: "Cable Crossover", category: "Chest" },
+            // BACK
+            { id: "se-17", name: "Pull-Up", category: "Back" },
+            { id: "se-18", name: "Barbell Row", category: "Back" },
+            { id: "se-19", name: "Lat Pulldown", category: "Back" },
+            { id: "se-20", name: "Seated Cable Row", category: "Back" },
+            { id: "se-21", name: "Dumbbell Single-Arm Row", category: "Back" },
+            { id: "se-22", name: "Hyperextension", category: "Back" },
+            { id: "se-23", name: "Chin-Up", category: "Back" },
+            // SHOULDERS
+            { id: "se-24", name: "Overhead Press (Barbell)", category: "Shoulders" },
+            { id: "se-25", name: "Dumbbell Shoulder Press", category: "Shoulders" },
+            { id: "se-26", name: "Lateral Raise (Dumbbell)", category: "Shoulders" },
+            { id: "se-27", name: "Rear Delt Flye (Dumbbell)", category: "Shoulders" },
+            { id: "se-28", name: "Face Pull", category: "Shoulders" },
+            // ARMS
+            { id: "se-29", name: "Dumbbell Bicep Curl", category: "Arms" },
+            { id: "se-30", name: "Hammer Curl (Dumbbell)", category: "Arms" },
+            { id: "se-31", name: "Barbell Preacher Curl", category: "Arms" },
+            { id: "se-32", name: "Tricep Pushdown (Cable)", category: "Arms" },
+            { id: "se-33", name: "Skull Crusher (Barbell)", category: "Arms" },
+            { id: "se-34", name: "Tricep Overhead Extension", category: "Arms" },
+            // CORE
+            { id: "se-35", name: "Plank", category: "Core" },
+            { id: "se-36", name: "Hanging Leg Raise", category: "Core" },
+            { id: "se-37", name: "Ab Wheel Rollout", category: "Core" },
+            { id: "se-38", name: "Cable Crunch", category: "Core" },
+            { id: "se-39", name: "Russian Twist", category: "Core" },
+            // STRETCHING & WARM-UP
+            { id: "se-40", name: "World's Greatest Stretch", category: "Stretching & Warm-up" },
+            { id: "se-41", name: "Cat-Cow Flow", category: "Stretching & Warm-up" },
+            { id: "se-42", name: "Pigeon Pose Stretch", category: "Stretching & Warm-up" },
+            { id: "se-43", name: "Couch Quad Stretch", category: "Stretching & Warm-up" },
+            { id: "se-44", name: "Dynamic Chest Opener", category: "Stretching & Warm-up" },
+            { id: "se-45", name: "Hamstring Scoop Sweep", category: "Stretching & Warm-up" },
+            { id: "se-46", name: "Band Dislocate Shoulder Pass", category: "Stretching & Warm-up" },
+            { id: "se-47", name: "Deep Squat Hold Mobility", category: "Stretching & Warm-up" },
+            { id: "se-48", name: "Foam Rolling (Thoracic/Quads)", category: "Stretching & Warm-up" },
+            { id: "se-49", name: "Child's Pose Lat Stretch", category: "Stretching & Warm-up" }
         ];
 
-        // INIT SETUP ENGINE
         window.addEventListener('DOMContentLoaded', () => {
-            loadFromLocalStorage();
+            loadFromStorage();
             renderAllViews();
             setupTimerLoop();
         });
 
-        function saveToLocalStorage() {
-            localStorage.setItem('workout_app_state', JSON.stringify(appState));
+        function saveToStorage() {
+            localStorage.setItem('workout_app_v2_state', JSON.stringify(appState));
         }
 
-        function loadFromLocalStorage() {
-            const data = localStorage.getItem('workout_app_state');
-            if (data) {
-                appState = JSON.parse(data);
-                // Clean running state checks if app crashed mid-session
+        function loadFromStorage() {
+            const stored = localStorage.getItem('workout_app_v2_state');
+            if (stored) {
+                appState = JSON.parse(stored);
                 if (!appState.exercises || appState.exercises.length === 0) appState.exercises = [...standardExercises];
+                if (!appState.routines) appState.routines = [];
                 if (!appState.history) appState.history = [];
                 if (!appState.schedule) appState.schedule = { "Mon": "", "Tue": "", "Wed": "", "Thu": "", "Fri": "", "Sat": "", "Sun": "" };
             } else {
                 appState.exercises = [...standardExercises];
-                saveToLocalStorage();
+                saveToStorage();
             }
         }
 
-        // TAB NAVIGATION ROUTER ENGINE
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${tabId}`).classList.add('active');
             
-            // Highlight nav layout adjustments
             document.querySelectorAll('nav button').forEach(el => {
                 el.classList.remove('text-indigo-400');
                 el.classList.add('text-slate-500');
@@ -230,14 +306,15 @@
             document.getElementById(`nav-${tabId}`).classList.remove('text-slate-500');
             document.getElementById(`nav-${tabId}`).classList.add('text-indigo-400');
 
-            const titles = { 'today': 'Plan Framework', 'workout': 'Track Session', 'exercises': 'App Dictionary', 'history': 'Performance History' };
+            const titles = { 'today': 'Weekly Schedule', 'workout': 'Track Session', 'exercises': 'App Dictionary', 'history': 'Performance History' };
             document.getElementById('page-title').innerText = titles[tabId];
             
             renderAllViews();
         }
 
         function renderAllViews() {
-            renderScheduleView();
+            renderScheduleDashboard();
+            renderRoutinePickers();
             renderActiveWorkoutView();
             renderExerciseDictionary();
             renderHistoryLogView();
@@ -257,30 +334,177 @@
             }, 1000);
         }
 
-        // CRITICAL SOLUTION FEATURE 1: RETRIEVE PREVIOUS WORKOUT WEIGHTS & REPS
+        function adjustWarmup(amount) {
+            if (!appState.activeWorkout) return;
+            appState.activeWorkout.warmupMinutes = Math.max(0, appState.activeWorkout.warmupMinutes + amount);
+            document.getElementById('warmup-display').innerText = `${appState.activeWorkout.warmupMinutes} mins`;
+            saveToLocalStorage();
+        }
+
         function getLastPerformanceData(exerciseName) {
-            // Traverse history records backwards
             for (let i = appState.history.length - 1; i >= 0; i--) {
                 const completedWorkout = appState.history[i];
                 const foundExercise = completedWorkout.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
                 if (foundExercise && foundExercise.sets && foundExercise.sets.length > 0) {
-                    return foundExercise.sets; // Return array of sets containing [{weight, reps}]
+                    return foundExercise.sets;
                 }
             }
-            return null; // No history fallback
+            return null;
         }
 
-        // BUSINESS TRACKER ENGINE (TAB 2)
-        function startFreestyleWorkout(name = "Freestyle Workout") {
+        // TAB 1 ROUTINES & SCHEDULING INTERACTION LOGIC
+        function renderRoutinePickers() {
+            const listPicker = document.getElementById('routine-exercise-picker');
+            listPicker.innerHTML = '';
+            
+            // Sort standard exercise array elements alphabetically
+            const sorted = [...appState.exercises].sort((a,b) => a.name.localeCompare(b.name));
+            sorted.forEach(ex => {
+                const lbl = document.createElement('label');
+                lbl.className = "flex items-center space-x-2 py-1 border-b border-slate-800 last:border-0";
+                lbl.innerHTML = `<input type="checkbox" value="${ex.name}" class="routine-ex-checkbox"> <span class="text-slate-300">${ex.name}</span>`;
+                listPicker.appendChild(lbl);
+            });
+
+            const blueprintsContainer = document.getElementById('created-routines-list');
+            blueprintsContainer.innerHTML = '';
+            
+            if(appState.routines.length === 0) {
+                blueprintsContainer.innerHTML = `<p class="text-xs text-slate-600 italic">No custom routines saved yet.</p>`;
+                return;
+            }
+
+            appState.routines.forEach(rt => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 p-3 rounded-lg border border-slate-800 flex justify-between items-center text-sm";
+                
+                // Collect days it recurringly targets
+                let assignedDays = [];
+                Object.keys(appState.schedule).forEach(day => {
+                    if(appState.schedule[day] === rt.id) assignedDays.push(day);
+                });
+                const daysStr = assignedDays.length > 0 ? assignedDays.join(', ') : 'Unscheduled';
+
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-slate-200">${rt.name}</p>
+                        <p class="text-[10px] text-indigo-400 font-medium">${rt.exercises.length} Exercises • Loop: ${daysStr}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="startWorkoutEngine('${rt.name}', ${JSON.stringify(rt.exercises).replace(/"/g, '&quot;')})" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold px-2.5 py-1 rounded-md">Start</button>
+                        <button onclick="deleteRoutineTemplate('${rt.id}')" class="text-xs text-slate-600 hover:text-rose-500 px-1">✕</button>
+                    </div>
+                `;
+                blueprintsContainer.appendChild(card);
+            });
+        }
+
+        function saveCustomRoutine() {
+            const nameInput = document.getElementById('routine-name-input');
+            const name = nameInput.value.trim();
+            if(!name) { alert("Please provide a routine blueprint template name."); return; }
+
+            // Extract checked exercises blueprint arrays
+            const selectedExs = [];
+            document.querySelectorAll('.routine-ex-checkbox:checked').forEach(cb => {
+                selectedExs.push(cb.value);
+            });
+
+            if(selectedExs.length === 0) { alert("Please select at least one exercise configuration row to bind to the routine."); return; }
+
+            const routineId = "rt-" + Date.now();
+            const newRoutine = { id: routineId, name: name, exercises: selectedExs };
+            appState.routines.push(newRoutine);
+
+            // Bind mapping targets to checked dashboard elements
+            document.querySelectorAll('.day-checkbox:checked').forEach(cb => {
+                appState.schedule[cb.value] = routineId;
+            });
+
+            nameInput.value = '';
+            document.querySelectorAll('.day-checkbox:checked').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.routine-ex-checkbox:checked').forEach(cb => cb.checked = false);
+
+            saveToStorage();
+            renderAllViews();
+        }
+
+        function deleteRoutineTemplate(rtId) {
+            if(confirm("Delete this routine layout? Days mapping to this blueprint will revert to empty spaces.")) {
+                appState.routines = appState.routines.filter(r => r.id !== rtId);
+                Object.keys(appState.schedule).forEach(day => {
+                    if(appState.schedule[day] === rtId) appState.schedule[day] = "";
+                });
+                saveToStorage();
+                renderAllViews();
+            }
+        }
+
+        function renderScheduleDashboard() {
+            const grid = document.getElementById('weekly-dashboard-grid');
+            grid.innerHTML = '';
+
+            const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            const daysMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const currentDayStr = daysMap[new Date().getDay()];
+
+            days.forEach(day => {
+                const targetRoutineId = appState.schedule[day];
+                const foundRoutine = appState.routines.find(r => r.id === targetRoutineId);
+                const isToday = (day === currentDayStr);
+
+                const block = document.createElement('div');
+                block.className = `p-3 rounded-xl border flex items-center justify-between text-sm ${isToday ? 'bg-indigo-950/20 border-indigo-500/40 shadow-md shadow-indigo-500/5' : 'bg-slate-950 border-slate-800'}`;
+                
+                let innerDetails = `<p class="text-slate-500 italic text-xs">Rest Day / Unscheduled</p>`;
+                let actionBtn = '';
+
+                if(foundRoutine) {
+                    innerDetails = `
+                        <p class="font-bold text-white text-sm">${foundRoutine.name}</p>
+                        <p class="text-[10px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">${foundRoutine.exercises.join(', ')}</p>
+                    `;
+                    actionBtn = `
+                        <button onclick="startWorkoutEngine('${foundRoutine.name}', ${JSON.stringify(foundRoutine.exercises).replace(/"/g, '&quot;')})" class="bg-indigo-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg active:scale-95 transition">
+                            Start
+                        </button>`;
+                }
+
+                block.innerHTML = `
+                    <div class="flex items-center space-x-3 flex-1 min-w-0">
+                        <span class="w-10 font-bold ${isToday ? 'text-indigo-400' : 'text-slate-400'} text-xs uppercase">${day}${isToday ? ' 📍' : ''}</span>
+                        <div class="flex-1 min-w-0">${innerDetails}</div>
+                    </div>
+                    <div>${actionBtn}</div>
+                `;
+                grid.appendChild(block);
+            });
+        }
+
+        // TAB 2 TRACKER EXECUTION HANDLERS
+        function startWorkoutEngine(title, exerciseNameArray) {
             appState.activeWorkout = {
-                name: name,
+                name: title,
                 startTime: Date.now(),
+                warmupMinutes: 0,
                 exercises: []
             };
-            document.getElementById('active-workout-name').value = name;
-            document.getElementById('active-workout-indicator').classList.remove('hidden');
-            saveToLocalStorage();
-            renderActiveWorkoutView();
+
+            exerciseNameArray.forEach(name => {
+                const pastSets = getLastPerformanceData(name);
+                let blueprint = [];
+                if(pastSets) {
+                    pastSets.forEach(s => blueprint.push({ weight: s.weight, reps: s.reps }));
+                } else {
+                    blueprint = [{ weight: "", reps: "" }, { weight: "", reps: "" }, { weight: "", reps: "" }];
+                }
+                appState.activeWorkout.exercises.push({ name: name, sets: blueprint });
+            });
+
+            document.getElementById('active-workout-name').value = title;
+            document.getElementById('warmup-display').innerText = "0 mins";
+            saveToStorage();
+            switchTab('workout');
         }
 
         function renderActiveWorkoutView() {
@@ -300,32 +524,31 @@
             document.getElementById('active-workout-indicator').classList.remove('hidden');
             listContainer.innerHTML = '';
 
+            document.getElementById('warmup-display').innerText = `${appState.activeWorkout.warmupMinutes} mins`;
+
             appState.activeWorkout.exercises.forEach((activeEx, exIndex) => {
                 const block = document.createElement('div');
                 block.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2";
                 
-                // Track historical match for ghost values
                 const pastSets = getLastPerformanceData(activeEx.name);
 
                 let setsHtml = '';
                 activeEx.sets.forEach((set, setIndex) => {
-                    // Match corresponding past set if it exists
                     const pastWeight = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].weight : '';
                     const pastReps = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].reps : '';
                     
-                    // CRITICAL UI SOLUTION: If inputs are blank, we auto-fill placeholders or allow default typing values seamlessly
                     setsHtml += `
                     <div class="grid grid-cols-12 gap-2 items-center text-sm bg-slate-900/40 p-1.5 rounded-lg">
-                        <span class="col-span-2 font-bold text-slate-500 text-center">S${setIndex + 1}</span>
+                        <span class="col-span-2 font-bold text-slate-500 text-center text-xs">S${setIndex + 1}</span>
                         <div class="col-span-4 flex items-center bg-slate-900 rounded border border-slate-700 px-2">
-                            <input type="number" step="any" placeholder="${pastWeight || '0'}" value="${set.weight}" oninput="updateSetData(${exIndex}, ${setIndex}, 'weight', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none">
-                            <span class="text-xs text-slate-500 ml-1">lbs</span>
+                            <input type="number" step="any" placeholder="${pastWeight || '0'}" value="${set.weight}" oninput="updateSetData(${exIndex}, ${setIndex}, 'weight', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none text-xs">
+                            <span class="text-[10px] text-slate-500 ml-1">lbs</span>
                         </div>
                         <div class="col-span-4 flex items-center bg-slate-900 rounded border border-slate-700 px-2">
-                            <input type="number" placeholder="${pastReps || '0'}" value="${set.reps}" oninput="updateSetData(${exIndex}, ${setIndex}, 'reps', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none">
-                            <span class="text-xs text-slate-500 ml-1">reps</span>
+                            <input type="number" placeholder="${pastReps || '0'}" value="${set.reps}" oninput="updateSetData(${exIndex}, ${setIndex}, 'reps', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none text-xs">
+                            <span class="text-[10px] text-slate-500 ml-1">reps</span>
                         </div>
-                        <button onclick="removeSetFromActive(${exIndex}, ${setIndex})" class="col-span-2 text-rose-500 text-center font-bold hover:bg-rose-500/10 rounded py-1">✕</button>
+                        <button onclick="removeSetFromActive(${exIndex}, ${setIndex})" class="col-span-2 text-rose-500 text-center text-xs font-bold hover:bg-rose-500/10 rounded py-1">✕</button>
                     </div>`;
                 });
 
@@ -333,12 +556,12 @@
                     <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-1">
                         <div>
                             <h4 class="font-bold text-white text-sm">${activeEx.name}</h4>
-                            ${pastSets ? `<span class="text-[10px] text-emerald-400 font-medium">✨ Found last data: S1 (${pastSets[0].weight} lbs x ${pastSets[0].reps})</span>` : '<span class="text-[10px] text-slate-500">No past data entry found</span>'}
+                            ${pastSets ? `<span class="text-[9px] text-emerald-400 font-medium tracking-tight">✨ Match found: S1 (${pastSets[0].weight}x${pastSets[0].reps})</span>` : '<span class="text-[9px] text-slate-500">No past metrics history</span>'}
                         </div>
-                        <button onclick="removeExerciseFromActive(${exIndex})" class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded border border-slate-800 hover:text-rose-400">Remove</button>
+                        <button onclick="removeExerciseFromActive(${exIndex})" class="text-xs text-slate-500 hover:text-rose-400">Remove</button>
                     </div>
                     <div class="space-y-1.5">${setsHtml}</div>
-                    <button onclick="addSetToActive(${exIndex})" class="w-full mt-2 py-1 text-xs text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10 border border-indigo-500/20 rounded-lg transition font-medium">
+                    <button onclick="addSetToActive(${exIndex})" class="w-full mt-2 py-1 text-[11px] text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10 border border-indigo-500/15 rounded-lg font-medium">
                         ➕ Add Set Data Row
                     </button>
                 `;
@@ -348,55 +571,45 @@
 
         function updateSetData(exIndex, setIndex, field, value) {
             appState.activeWorkout.exercises[exIndex].sets[setIndex][field] = value;
-            saveToLocalStorage();
+            saveToStorage();
         }
 
         function addSetToActive(exIndex) {
             appState.activeWorkout.exercises[exIndex].sets.push({ weight: "", reps: "" });
-            saveToLocalStorage();
+            saveToStorage();
             renderActiveWorkoutView();
         }
 
         function removeSetFromActive(exIndex, setIndex) {
             appState.activeWorkout.exercises[exIndex].sets.splice(setIndex, 1);
-            saveToLocalStorage();
+            saveToStorage();
             renderActiveWorkoutView();
         }
 
         function removeExerciseFromActive(exIndex) {
             appState.activeWorkout.exercises.splice(exIndex, 1);
-            saveToLocalStorage();
+            saveToStorage();
             renderActiveWorkoutView();
         }
 
-        // DETECT AND AUTO-INJECT MOVEMENT DATA FROM SELECTION
         function addExerciseToActive(exerciseName) {
             const pastSets = getLastPerformanceData(exerciseName);
-            let setsBlueprint = [];
-
+            let blueprint = [];
             if (pastSets) {
-                // SOLUTION: Pre-populate directly by building rows mirroring the identical quantities/metrics from last session
-                pastSets.forEach(s => {
-                    setsBlueprint.push({ weight: s.weight, reps: s.reps });
-                });
+                pastSets.forEach(s => blueprint.push({ weight: s.weight, reps: s.reps }));
             } else {
-                // If it's a brand new exercise, start with 3 clean empty set rows
-                setsBlueprint = [{ weight: "", reps: "" }, { weight: "", reps: "" }, { weight: "", reps: "" }];
+                blueprint = [{ weight: "", reps: "" }, { weight: "", reps: "" }, { weight: "", reps: "" }];
             }
-
-            appState.activeWorkout.exercises.push({
-                name: exerciseName,
-                sets: setsBlueprint
-            });
-            saveToLocalStorage();
+            appState.activeWorkout.exercises.push({ name: exerciseName, sets: blueprint });
+            saveToStorage();
             closeAddExerciseModal();
             renderActiveWorkoutView();
         }
 
-        // CRITICAL SOLUTION FEATURE 2: FLEXIBLE SAVING & DROPPING EMPTY VALUES
+        // CRITICAL UPDATE FEATURE 3: COMPLETE REJECTION ENGINE FOR ZERO OR BLANK LOGS
         function finishActiveWorkout() {
             if (!appState.activeWorkout || appState.activeWorkout.exercises.length === 0) {
-                alert("Please add at least one exercise before completing.");
+                alert("Please track at least one movement before finishing.");
                 return;
             }
 
@@ -410,65 +623,62 @@
                     let finalWeight = set.weight;
                     let finalReps = set.reps;
 
-                    // GHOST AUTO-POPULATE RULE: If user left input box completely empty, check if we had ghost data to commit
+                    // Fallback injection check for ghost variables if unedited
                     if (finalWeight === "" && pastSets && pastSets[idx]) finalWeight = pastSets[idx].weight;
                     if (finalReps === "" && pastSets && pastSets[idx]) finalReps = pastSets[idx].reps;
 
-                    // FLEXIBLE VALIDATION CHECK: Only save data row if user has real metrics entered or adopted
-                    if (finalWeight !== "" && finalReps !== "" && finalWeight !== null && finalReps !== null) {
-                        filledSets.push({
-                            weight: parseFloat(finalWeight),
-                            reps: parseInt(finalReps)
-                        });
+                    // CRITICAL VALIDATION CHECK: Strip completely if empty, string text nulls, or numerical 0 values
+                    const parsedW = parseFloat(finalWeight);
+                    const parsedR = parseInt(finalReps);
+
+                    if (!isNaN(parsedW) && !isNaN(parsedR) && parsedW > 0 && parsedR > 0) {
+                        filledSets.push({ weight: parsedW, reps: parsedR });
                     }
                 });
 
-                // Drop the entire exercise cleanly if they skipped every single set entry box
+                // If all sets are skipped or contain zeros, this entire block is ignored and dropped completely
                 if (filledSets.length > 0) {
-                    cleanLoggedExercises.push({
-                        name: ex.name,
-                        sets: filledSets
-                    });
+                    cleanLoggedExercises.push({ name: ex.name, sets: filledSets });
                 }
             });
 
-            if (cleanLoggedExercises.length === 0) {
-                alert("You didn't log any values. If you want to cancel, click 'Cancel Session'. You cannot save an entirely blank workout log.");
+            // If the user did literally zero reps across everything, let them know or allow cancellation
+            if (cleanLoggedExercises.length === 0 && appState.activeWorkout.warmupMinutes === 0) {
+                alert("No non-zero performance data or warm-up time was logged. If you want to dump this session, use 'Discard'.");
                 return;
             }
 
-            // Read the dynamic text header title name
             const explicitName = document.getElementById('active-workout-name').value || "Completed Workout";
 
-            // Push record payload block to history list
             appState.history.push({
                 id: "log-" + Date.now(),
                 name: explicitName,
                 date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
                 durationMins: Math.floor((Date.now() - appState.activeWorkout.startTime) / 60000),
+                warmupMinutes: appState.activeWorkout.warmupMinutes,
                 exercises: cleanLoggedExercises
             });
 
             appState.activeWorkout = null;
-            saveToLocalStorage();
+            saveToStorage();
             switchTab('history');
         }
 
         function cancelActiveWorkout() {
-            if (confirm("Are you sure you want to completely discard this workout tracking session? No history data will be saved.")) {
+            if (confirm("Discard this track session completely? All blank or partial numbers will be erased.")) {
                 appState.activeWorkout = null;
-                saveToLocalStorage();
+                saveToStorage();
                 renderActiveWorkoutView();
             }
         }
 
-        // MODAL INTERFACE ROUTING HOOKS
+        // MODAL ROUTER TRIGGERS
         function openAddExerciseModal() {
             document.getElementById('exercise-modal').classList.remove('hidden');
             renderModalExercises();
         }
 
-        function closeAddExerciseModal() {
+        fn = closeAddExerciseModal = () => {
             document.getElementById('exercise-modal').classList.add('hidden');
             document.getElementById('modal-search').value = '';
         }
@@ -479,93 +689,40 @@
             container.innerHTML = '';
 
             const filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(term));
-            
             filtered.forEach(e => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left py-3 px-4 bg-slate-800 border border-slate-700/60 text-slate-200 rounded-xl text-sm transition active:bg-indigo-600 active:text-white flex justify-between items-center mb-1.5";
+                btn.className = "w-full text-left py-2.5 px-3 bg-slate-800 border border-slate-700/60 text-slate-200 rounded-xl text-xs flex justify-between items-center mb-1";
                 btn.onclick = () => addExerciseToActive(e.name);
-                btn.innerHTML = `<span>${e.name}</span> <span class="text-xs text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full">${e.category}</span>`;
+                btn.innerHTML = `<span>${e.name}</span> <span class="text-[10px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full">${e.category}</span>`;
                 container.appendChild(btn);
             });
         }
 
-        // SCHEDULING INTERFACE CONTROLLER (TAB 1)
-        function renderScheduleView() {
-            const schedContainer = document.getElementById('today-scheduled-view');
-            const listContainer = document.getElementById('weekly-scheduler-list');
-            
-            // Resolve today's shorthand index name string
-            const daysMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const todayIndexStr = daysMap[new Date().getDay()];
-            const todayRoutineName = appState.schedule[todayIndexStr];
-
-            if (todayRoutineName && todayRoutineName.trim() !== "") {
-                schedContainer.innerHTML = `
-                    <div class="flex justify-between items-center py-2">
-                        <div>
-                            <p class="text-lg font-bold text-white">${todayRoutineName}</p>
-                            <p class="text-xs text-slate-400">Target routing planned for today (${todayIndexStr})</p>
-                        </div>
-                        <button onclick="startFreestyleWorkout('${todayRoutineName}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-lg transition">
-                            🚀 Start Now
-                        </button>
-                    </div>`;
-            } else {
-                schedContainer.innerHTML = `<p class="text-sm text-slate-400 py-1">No workout target set for today. Rest day or track unstructured training below.</p>`;
-            }
-
-            listContainer.innerHTML = '';
-            Object.keys(appState.schedule).forEach(day => {
-                const isToday = (day === todayIndexStr);
-                const row = document.createElement('div');
-                row.className = `flex items-center justify-between p-2 rounded-xl border ${isToday ? 'bg-indigo-950/20 border-indigo-500/40' : 'bg-slate-950 border-slate-800'}`;
-                
-                row.innerHTML = `
-                    <span class="w-12 font-bold text-sm ${isToday ? 'text-indigo-400' : 'text-slate-400'}">${day}${isToday ? ' 📍' : ''}</span>
-                    <input type="text" placeholder="Rest / Add Workout Title..." value="${appState.schedule[day]}" 
-                        onchange="updateScheduleDay('${day}', this.value)" 
-                        class="flex-1 min-w-0 mx-3 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
-                `;
-                listContainer.appendChild(row);
-            });
-        }
-
-        function updateScheduleDay(day, value) {
-            appState.schedule[day] = value;
-            saveToLocalStorage();
-            renderScheduleView();
-        }
-
-        // CRITICAL SOLUTION FEATURE 3: UNLIMITED EXERCISE LIBRARY ENGINE (TAB 3)
+        // TAB 3: LIBRARY DICTIONARY RENDERING
         function renderExerciseDictionary() {
             const container = document.getElementById('dictionary-list');
             const searchVal = document.getElementById('exercise-search').value.toLowerCase();
             container.innerHTML = '';
 
             const filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(searchVal));
-
-            // Group outputs beautifully by programmatic movement category splits
             const categories = [...new Set(filtered.map(e => e.category))].sort();
 
             if (filtered.length === 0) {
-                container.innerHTML = `<p class="text-center py-6 text-xs text-slate-500">No exercises matched your search term.</p>`;
+                container.innerHTML = `<p class="text-center py-6 text-xs text-slate-500">No exercise targets match your filter query.</p>`;
                 return;
             }
 
             categories.forEach(cat => {
                 const catBlock = document.createElement('div');
-                catBlock.className = "space-y-1.5 pt-2";
-                catBlock.innerHTML = `<h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 pl-1">${cat}</h4>`;
+                catBlock.className = "space-y-1.5";
+                catBlock.innerHTML = `<h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 pl-1">${cat}</h4>`;
                 
                 filtered.filter(e => e.category === cat).forEach(e => {
                     const el = document.createElement('div');
-                    el.className = "flex justify-between items-center bg-slate-950 px-3 py-2.5 rounded-xl border border-slate-800 text-sm";
+                    el.className = "flex justify-between items-center bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 text-sm";
                     el.innerHTML = `
-                        <div class="flex items-center space-x-2">
-                            <span class="font-medium text-slate-200">${e.name}</span>
-                            ${e.isCustom ? '<span class="text-[9px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.2 rounded border border-indigo-500/20">Custom</span>' : ''}
-                        </div>
-                        <button onclick="quickStartExercise('${e.name}')" class="text-xs text-indigo-400 font-medium bg-indigo-500/5 px-2.5 py-1 rounded-lg border border-indigo-500/10 hover:bg-indigo-500/20">
+                        <span class="font-medium text-slate-300 text-xs">${e.name}</span>
+                        <button onclick="quickStartExercise('${e.name}')" class="text-xs text-indigo-400 bg-indigo-500/5 px-2.5 py-1 rounded-lg border border-indigo-500/10">
                             Track
                         </button>
                     `;
@@ -581,41 +738,27 @@
             const name = nameInput.value.trim();
             const cat = catSelect.value;
 
-            if (!name) {
-                alert("Please provide an exercise name configuration descriptor.");
-                return;
-            }
+            if (!name) { alert("Please input a movement name."); return; }
+            if (appState.exercises.some(e => e.name.toLowerCase() === name.toLowerCase())) { alert("That movement configuration already exists."); return; }
 
-            // Validation against pre-existing items
-            if (appState.exercises.some(e => e.name.toLowerCase() === name.toLowerCase())) {
-                alert("An exercise configuration with that identical name already exists.");
-                return;
-            }
-
-            const newObj = {
-                id: "custom-" + Date.now(),
-                name: name,
-                category: cat,
-                isCustom: true
-            };
-
-            appState.exercises.push(newObj);
-            saveToLocalStorage();
+            appState.exercises.push({ id: "custom-" + Date.now(), name: name, category: cat });
+            saveToStorage();
             
             nameInput.value = '';
             renderExerciseDictionary();
-            alert(`"${name}" successfully injected into live database library list.`);
+            renderRoutinePickers();
         }
 
         function quickStartExercise(name) {
             if (!appState.activeWorkout) {
-                startFreestyleWorkout(`Workout - ${name}`);
+                startWorkoutEngine(`Focus - ${name}`, [name]);
+            } else {
+                addExerciseToActive(name);
             }
-            addExerciseToActive(name);
             switchTab('workout');
         }
 
-        // HISTORY VIEW LOADER ENGINE (TAB 4)
+        // TAB 4: COMPREHENSIVE RECORDS AND SUMMARY VISUALIZATION
         function renderHistoryLogView() {
             const listContainer = document.getElementById('history-list');
             const emptyLabel = document.getElementById('history-empty');
@@ -627,7 +770,6 @@
             }
             emptyLabel.classList.add('hidden');
 
-            // Render array elements upside-down for chronological sorting layouts
             for (let i = appState.history.length - 1; i >= 0; i--) {
                 const log = appState.history[i];
                 const block = document.createElement('div');
@@ -639,28 +781,33 @@
                     innerExercises += `
                     <div class="text-xs text-slate-300">
                         <span class="font-bold text-slate-400">${ex.name}:</span> 
-                        <span class="font-mono">${setTokens}</span>
+                        <span class="font-mono text-[11px] text-slate-400">${setTokens}</span>
                     </div>`;
                 });
 
+                // Display stretching warning or text notes if they completed an entirely movement-free session but tracked warm up
+                if(log.exercises.length === 0 && log.warmupMinutes > 0) {
+                    innerExercises = `<p class="text-xs text-indigo-400 italic">Target block focused entirely on Warm-up & Flexibility work.</p>`;
+                }
+
                 block.innerHTML = `
-                    <button onclick="deleteHistoryLog('${log.id}')" class="absolute top-3 right-3 text-slate-600 hover:text-rose-500 transition text-xs p-1">Delete</button>
+                    <button onclick="deleteHistoryLog('${log.id}')" class="absolute top-3 right-3 text-slate-600 hover:text-rose-500 text-xs p-1">Delete</button>
                     <div class="flex justify-between items-baseline border-b border-slate-900 pb-2">
                         <div>
-                            <h4 class="font-bold text-white text-md">${log.name}</h4>
-                            <p class="text-[10px] text-slate-500">${log.date} • ⏱️ ${log.durationMins} mins</p>
+                            <h4 class="font-bold text-white text-sm">${log.name}</h4>
+                            <p class="text-[10px] text-slate-500">${log.date} • Session: ${log.durationMins}m ${log.warmupMinutes > 0 ? `(Inc. ${log.warmupMinutes}m Warm-up)` : ''}</p>
                         </div>
                     </div>
-                    <div class="space-y-1.5">${innerExercises}</div>
+                    <div class="space-y-1">${innerExercises}</div>
                 `;
                 listContainer.appendChild(block);
             }
         }
 
         function deleteHistoryLog(logId) {
-            if (confirm("Permanently erase this workout log calculation entry from history?")) {
+            if (confirm("Permanently drop this training history record row?")) {
                 appState.history = appState.history.filter(h => h.id !== logId);
-                saveToLocalStorage();
+                saveToStorage();
                 renderHistoryLogView();
             }
         }
