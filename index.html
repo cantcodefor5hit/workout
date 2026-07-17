@@ -145,7 +145,7 @@
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
                     <h3 class="font-bold text-sm uppercase tracking-wider text-indigo-400">Add Custom Exercise</h3>
                     <div class="grid grid-cols-1 gap-2">
-                        <input id="new-exercise-name" type="text" placeholder="Exercise Name" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <input id="new-exercise-name" type="text" autocomplete="off" placeholder="Exercise Name" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
                         <select id="new-exercise-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none">
                             <option value="Legs">Legs</option>
                             <option value="Chest">Chest</option>
@@ -248,7 +248,7 @@
 
             <div id="modal-custom-view" class="hidden flex-col space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 uppercase">Quick Add to Dictionary</h4>
-                <input id="modal-new-ex-name" type="text" placeholder="New Movement Name" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+                <input id="modal-new-ex-name" type="text" autocomplete="off" placeholder="New Movement Name" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
                 <div class="grid grid-cols-2 gap-2">
                     <select id="modal-new-ex-cat" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none">
                         <option value="Legs">Legs</option>
@@ -689,10 +689,21 @@
 
                 // Add Collapse Header
                 const collapseId = `collapse-group-${groupIndex}`;
+                
+                // Determine the text for the header based on group size
+                let headerText = '';
+                if (group.length === 1) {
+                    headerText = group[0].name;
+                } else if (group.length === 2) {
+                    headerText = `${group[0].name} & ${group[1].name}`;
+                } else {
+                    headerText = `${group[0].name}, ${group[1].name}...`;
+                }
+
                 groupContainer.innerHTML = `
                     <div class="flex justify-between items-center bg-slate-900/40 px-3 py-2 border-b border-slate-900">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">${group.length > 1 ? 'Linked Group' : 'Movement Block'}</span>
-                        <button onclick="document.getElementById('${collapseId}').classList.toggle('hidden'); this.innerText = this.innerText === 'Hide 🔼' ? 'Show 🔽' : 'Hide 🔼';" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold bg-indigo-500/10 px-2 py-0.5 rounded transition">Hide 🔼</button>
+                        <span class="text-xs font-bold text-slate-300 truncate pr-2">${headerText}</span>
+                        <button onclick="document.getElementById('${collapseId}').classList.toggle('hidden'); this.innerText = this.innerText === 'Hide 🔼' ? 'Show 🔽' : 'Hide 🔼';" class="text-[10px] shrink-0 text-indigo-400 hover:text-indigo-300 font-bold bg-indigo-500/10 px-2 py-0.5 rounded transition">Hide 🔼</button>
                     </div>
                     <div id="${collapseId}" class="transition-all duration-200"></div>
                 `;
