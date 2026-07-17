@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Custom Workout Tracker</title>
+    <!-- Tailwind CSS for a modern, sleek mobile layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Prevents elastic scrolling glitches on mobile devices */
+        body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-indigo-500">
+
+    <div class="max-w-md mx-auto min-h-screen flex flex-col bg-slate-900 shadow-2xl pb-24">
+        
+        <!-- HEADER -->
+        <header class="bg-slate-950/80 backdrop-blur border-b border-slate-800 p-4 sticky top-0 z-40 flex justify-between items-center">
+            <h1 id="page-title" class="text-xl font-bold tracking-tight text-indigo-400">Today's Training</h1>
+            <div id="active-workout-indicator" class="hidden text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full font-medium border border-emerald-500/30 animate-pulse">
+                Workout Live
+            </div>
+        </header>
+
+        <!-- MAIN CONTAINER -->
+        <main class="flex-1 p-4 overflow-y-auto">
+
+            <!-- TAB 1: SCHEDULE / TODAY -->
+            <div id="tab-today" class="tab-content active space-y-6">
+                <div class="bg-gradient-to-br from-indigo-900/40 to-slate-800/40 border border-indigo-500/20 rounded-2xl p-4">
+                    <h2 class="text-sm font-semibold tracking-wider uppercase text-indigo-400">Scheduled for Today</h2>
+                    <div id="today-scheduled-view" class="mt-2 text-slate-300">
+                        <!-- Dynamic scheduling loadout -->
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-md font-semibold text-slate-400 mb-3">Weekly Schedule Planner</h3>
+                    <div id="weekly-scheduler-list" class="space-y-2">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: ACTIVE WORKOUT TRACKER -->
+            <div id="tab-workout" class="tab-content space-y-4">
+                <div id="no-active-workout" class="text-center py-12 space-y-4">
+                    <p class="text-slate-400">No active workout session running.</p>
+                    <button onclick="startFreestyleWorkout()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition shadow-lg shadow-indigo-600/20 active:scale-95">
+                        ⚡ Start Empty Workout
+                    </button>
+                    <p class="text-xs text-slate-500">Or tap a routine from the Today tab or an exercise below.</p>
+                </div>
+
+                <div id="active-workout-container" class="hidden space-y-6">
+                    <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <input id="active-workout-name" type="text" class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 text-lg font-bold text-white focus:outline-none px-1 py-0.5" value="Freestyle Workout">
+                        <span id="workout-timer" class="text-sm font-mono text-slate-400">00:00</span>
+                    </div>
+
+                    <div id="active-exercises-list" class="space-y-4">
+                        <!-- Active exercises go here dynamically -->
+                    </div>
+
+                    <div class="space-y-3 pt-4">
+                        <button onclick="openAddExerciseModal()" class="w-full py-2.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 font-medium rounded-xl transition text-sm">
+                            ➕ Add Exercise to This Workout
+                        </button>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="cancelActiveWorkout()" class="py-3 bg-slate-800 border border-slate-700 text-rose-400 font-medium rounded-xl text-sm transition active:scale-95">
+                                Cancel Session
+                            </button>
+                            <button onclick="finishActiveWorkout()" class="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-600/20 active:scale-95">
+                                Finish Workout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: EXERCISE DICTIONARY -->
+            <div id="tab-exercises" class="tab-content space-y-4">
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h3 class="font-bold text-sm uppercase tracking-wider text-indigo-400">Add Missing Custom Exercise</h3>
+                    <div class="grid grid-cols-1 gap-2">
+                        <input id="new-exercise-name" type="text" placeholder="Exercise Name (e.g., Deficit Deadlift)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <select id="new-exercise-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+                            <option value="Legs">Legs</option>
+                            <option value="Chest">Chest</option>
+                            <option value="Back">Back</option>
+                            <option value="Shoulders">Shoulders</option>
+                            <option value="Arms">Arms</option>
+                            <option value="Core">Core</option>
+                            <option value="Mobility/Other">Mobility / Other</option>
+                        </select>
+                        <button onclick="addNewCustomExercise()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition">
+                            Save into App Database
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <input id="exercise-search" type="text" oninput="renderExerciseDictionary()" placeholder="Search library..." class="w-full pl-3 pr-10 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div id="dictionary-list" class="space-y-2">
+                    <!-- Complete exercise directory list -->
+                </div>
+            </div>
+
+            <!-- TAB 4: WORKOUT LOG HISTORY -->
+            <div id="tab-history" class="tab-content space-y-4">
+                <div id="history-empty" class="text-center py-12 text-slate-500 text-sm hidden">
+                    No logged workouts found. Complete your first session to see records here.
+                </div>
+                <div id="history-list" class="space-y-4">
+                    <!-- Historical list of logs -->
+                </div>
+            </div>
+
+        </main>
+
+        <!-- PERSISTENT MOBILE BOTTOM NAVIGATION BAR -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-16 flex justify-around items-center z-50 px-2">
+            <button onclick="switchTab('today')" id="nav-today" class="flex flex-col items-center justify-center flex-1 py-2 text-indigo-400 font-medium text-xs">
+                <span class="text-lg mb-0.5">🗓️</span>
+                <span>Plan</span>
+            </button>
+            <button onclick="switchTab('workout')" id="nav-workout" class="flex flex-col items-center justify-center flex-1 py-2 text-slate-500 font-medium text-xs">
+                <span class="text-lg mb-0.5">🏋️‍♂️</span>
+                <span>Track</span>
+            </button>
+            <button onclick="switchTab('exercises')" id="nav-exercises" class="flex flex-col items-center justify-center flex-1 py-2 text-slate-500 font-medium text-xs">
+                <span class="text-lg mb-0.5">📚</span>
+                <span>Exercises</span>
+            </button>
+            <button onclick="switchTab('history')" id="nav-history" class="flex flex-col items-center justify-center flex-1 py-2 text-slate-500 font-medium text-xs">
+                <span class="text-lg mb-0.5">📈</span>
+                <span>History</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL POPUP FOR SELECTING MOVEMENT INSIDE ACTIVE TRACKER -->
+    <div id="exercise-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-end justify-center">
+        <div class="bg-slate-900 w-full max-w-md border-t border-slate-800 rounded-t-2xl p-4 space-y-4 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center">
+                <h3 class="text-md font-bold text-white">Select Exercise</h3>
+                <button onclick="closeAddExerciseModal()" class="text-slate-400 p-1 text-sm bg-slate-800 rounded-full w-7 h-7 flex items-center justify-center">✕</button>
+            </div>
+            <input id="modal-search" type="text" oninput="renderModalExercises()" placeholder="Search..." class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+            <div id="modal-list" class="flex-1 overflow-y-auto space-y-1 pr-1">
+                <!-- Search elements generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT APP CONFIGURATION INTERACTION ENGINE -->
+    <script>
+        // CORE STATE DATA MANAGEMENT SETUP
+        let appState = {
+            exercises: [],
+            history: [],
+            schedule: { "Mon": "", "Tue": "", "Wed": "", "Thu": "", "Fri": "", "Sat": "", "Sun": "" },
+            activeWorkout: null
+        };
+
+        // Seed comprehensive foundational movement dictionary
+        const standardExercises = [
+            { id: "ex-1", name: "Squat (Barbell)", category: "Legs", isCustom: false },
+            { id: "ex-2", name: "Bench Press (Barbell)", category: "Chest", isCustom: false },
+            { id: "ex-3", name: "Deadlift (Barbell)", category: "Legs", isCustom: false },
+            { id: "ex-4", name: "Overhead Press (Barbell)", category: "Shoulders", isCustom: false },
+            { id: "ex-5", name: "Pull-Up", category: "Back", isCustom: false },
+            { id: "ex-6", name: "Push-Up", category: "Chest", isCustom: false },
+            { id: "ex-7", name: "Barbell Row", category: "Back", isCustom: false },
+            { id: "ex-8", name: "Dumbbell Bicep Curl", category: "Arms", isCustom: false },
+            { id: "ex-9", name: "Tricep Overhead Extension", category: "Arms", isCustom: false },
+            { id: "ex-10", name: "Lateral Raise (Dumbbell)", category: "Shoulders", isCustom: false },
+            { id: "ex-11", name: "Leg Press", category: "Legs", isCustom: false },
+            { id: "ex-12", name: "Romanian Deadlift (Barbell)", category: "Legs", isCustom: false },
+            { id: "ex-13", name: "Bulgarian Split Squat", category: "Legs", isCustom: false },
+            { id: "ex-14", name: "Lat Pulldown", category: "Back", isCustom: false },
+            { id: "ex-15", name: "Incline Dumbbell Press", category: "Chest", isCustom: false },
+            { id: "ex-16", name: "Plank", category: "Core", isCustom: false },
+            { id: "ex-17", name: "Hanging Leg Raise", category: "Core", isCustom: false },
+            { id: "ex-18", name: "Dips", category: "Chest", isCustom: false },
+            { id: "ex-19", name: "Face Pull", category: "Shoulders", isCustom: false },
+            { id: "ex-20", name: "Foam Rolling & Mobility", category: "Mobility/Other", isCustom: false }
+        ];
+
+        // INIT SETUP ENGINE
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            renderAllViews();
+            setupTimerLoop();
+        });
+
+        function saveToLocalStorage() {
+            localStorage.setItem('workout_app_state', JSON.stringify(appState));
+        }
+
+        function loadFromLocalStorage() {
+            const data = localStorage.getItem('workout_app_state');
+            if (data) {
+                appState = JSON.parse(data);
+                // Clean running state checks if app crashed mid-session
+                if (!appState.exercises || appState.exercises.length === 0) appState.exercises = [...standardExercises];
+                if (!appState.history) appState.history = [];
+                if (!appState.schedule) appState.schedule = { "Mon": "", "Tue": "", "Wed": "", "Thu": "", "Fri": "", "Sat": "", "Sun": "" };
+            } else {
+                appState.exercises = [...standardExercises];
+                saveToLocalStorage();
+            }
+        }
+
+        // TAB NAVIGATION ROUTER ENGINE
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Highlight nav layout adjustments
+            document.querySelectorAll('nav button').forEach(el => {
+                el.classList.remove('text-indigo-400');
+                el.classList.add('text-slate-500');
+            });
+            document.getElementById(`nav-${tabId}`).classList.remove('text-slate-500');
+            document.getElementById(`nav-${tabId}`).classList.add('text-indigo-400');
+
+            const titles = { 'today': 'Plan Framework', 'workout': 'Track Session', 'exercises': 'App Dictionary', 'history': 'Performance History' };
+            document.getElementById('page-title').innerText = titles[tabId];
+            
+            renderAllViews();
+        }
+
+        function renderAllViews() {
+            renderScheduleView();
+            renderActiveWorkoutView();
+            renderExerciseDictionary();
+            renderHistoryLogView();
+        }
+
+        // TIMER HANDLER
+        let timerInterval = null;
+        function setupTimerLoop() {
+            setInterval(() => {
+                if (appState.activeWorkout) {
+                    const elapsed = Math.floor((Date.now() - appState.activeWorkout.startTime) / 1000);
+                    const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+                    const secs = String(elapsed % 60).padStart(2, '0');
+                    const timerEl = document.getElementById('workout-timer');
+                    if (timerEl) timerEl.innerText = `${mins}:${secs}`;
+                }
+            }, 1000);
+        }
+
+        // CRITICAL SOLUTION FEATURE 1: RETRIEVE PREVIOUS WORKOUT WEIGHTS & REPS
+        function getLastPerformanceData(exerciseName) {
+            // Traverse history records backwards
+            for (let i = appState.history.length - 1; i >= 0; i--) {
+                const completedWorkout = appState.history[i];
+                const foundExercise = completedWorkout.exercises.find(e => e.name.toLowerCase() === exerciseName.toLowerCase());
+                if (foundExercise && foundExercise.sets && foundExercise.sets.length > 0) {
+                    return foundExercise.sets; // Return array of sets containing [{weight, reps}]
+                }
+            }
+            return null; // No history fallback
+        }
+
+        // BUSINESS TRACKER ENGINE (TAB 2)
+        function startFreestyleWorkout(name = "Freestyle Workout") {
+            appState.activeWorkout = {
+                name: name,
+                startTime: Date.now(),
+                exercises: []
+            };
+            document.getElementById('active-workout-name').value = name;
+            document.getElementById('active-workout-indicator').classList.remove('hidden');
+            saveToLocalStorage();
+            renderActiveWorkoutView();
+        }
+
+        function renderActiveWorkoutView() {
+            const noActiveView = document.getElementById('no-active-workout');
+            const activeContainer = document.getElementById('active-workout-container');
+            const listContainer = document.getElementById('active-exercises-list');
+
+            if (!appState.activeWorkout) {
+                noActiveView.classList.remove('hidden');
+                activeContainer.classList.add('hidden');
+                document.getElementById('active-workout-indicator').classList.add('hidden');
+                return;
+            }
+
+            noActiveView.classList.add('hidden');
+            activeContainer.classList.remove('hidden');
+            document.getElementById('active-workout-indicator').classList.remove('hidden');
+            listContainer.innerHTML = '';
+
+            appState.activeWorkout.exercises.forEach((activeEx, exIndex) => {
+                const block = document.createElement('div');
+                block.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2";
+                
+                // Track historical match for ghost values
+                const pastSets = getLastPerformanceData(activeEx.name);
+
+                let setsHtml = '';
+                activeEx.sets.forEach((set, setIndex) => {
+                    // Match corresponding past set if it exists
+                    const pastWeight = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].weight : '';
+                    const pastReps = (pastSets && pastSets[setIndex]) ? pastSets[setIndex].reps : '';
+                    
+                    // CRITICAL UI SOLUTION: If inputs are blank, we auto-fill placeholders or allow default typing values seamlessly
+                    setsHtml += `
+                    <div class="grid grid-cols-12 gap-2 items-center text-sm bg-slate-900/40 p-1.5 rounded-lg">
+                        <span class="col-span-2 font-bold text-slate-500 text-center">S${setIndex + 1}</span>
+                        <div class="col-span-4 flex items-center bg-slate-900 rounded border border-slate-700 px-2">
+                            <input type="number" step="any" placeholder="${pastWeight || '0'}" value="${set.weight}" oninput="updateSetData(${exIndex}, ${setIndex}, 'weight', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none">
+                            <span class="text-xs text-slate-500 ml-1">lbs</span>
+                        </div>
+                        <div class="col-span-4 flex items-center bg-slate-900 rounded border border-slate-700 px-2">
+                            <input type="number" placeholder="${pastReps || '0'}" value="${set.reps}" oninput="updateSetData(${exIndex}, ${setIndex}, 'reps', this.value)" class="w-full bg-transparent text-white text-center py-1 focus:outline-none">
+                            <span class="text-xs text-slate-500 ml-1">reps</span>
+                        </div>
+                        <button onclick="removeSetFromActive(${exIndex}, ${setIndex})" class="col-span-2 text-rose-500 text-center font-bold hover:bg-rose-500/10 rounded py-1">✕</button>
+                    </div>`;
+                });
+
+                block.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-1">
+                        <div>
+                            <h4 class="font-bold text-white text-sm">${activeEx.name}</h4>
+                            ${pastSets ? `<span class="text-[10px] text-emerald-400 font-medium">✨ Found last data: S1 (${pastSets[0].weight} lbs x ${pastSets[0].reps})</span>` : '<span class="text-[10px] text-slate-500">No past data entry found</span>'}
+                        </div>
+                        <button onclick="removeExerciseFromActive(${exIndex})" class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded border border-slate-800 hover:text-rose-400">Remove</button>
+                    </div>
+                    <div class="space-y-1.5">${setsHtml}</div>
+                    <button onclick="addSetToActive(${exIndex})" class="w-full mt-2 py-1 text-xs text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10 border border-indigo-500/20 rounded-lg transition font-medium">
+                        ➕ Add Set Data Row
+                    </button>
+                `;
+                listContainer.appendChild(block);
+            });
+        }
+
+        function updateSetData(exIndex, setIndex, field, value) {
+            appState.activeWorkout.exercises[exIndex].sets[setIndex][field] = value;
+            saveToLocalStorage();
+        }
+
+        function addSetToActive(exIndex) {
+            appState.activeWorkout.exercises[exIndex].sets.push({ weight: "", reps: "" });
+            saveToLocalStorage();
+            renderActiveWorkoutView();
+        }
+
+        function removeSetFromActive(exIndex, setIndex) {
+            appState.activeWorkout.exercises[exIndex].sets.splice(setIndex, 1);
+            saveToLocalStorage();
+            renderActiveWorkoutView();
+        }
+
+        function removeExerciseFromActive(exIndex) {
+            appState.activeWorkout.exercises.splice(exIndex, 1);
+            saveToLocalStorage();
+            renderActiveWorkoutView();
+        }
+
+        // DETECT AND AUTO-INJECT MOVEMENT DATA FROM SELECTION
+        function addExerciseToActive(exerciseName) {
+            const pastSets = getLastPerformanceData(exerciseName);
+            let setsBlueprint = [];
+
+            if (pastSets) {
+                // SOLUTION: Pre-populate directly by building rows mirroring the identical quantities/metrics from last session
+                pastSets.forEach(s => {
+                    setsBlueprint.push({ weight: s.weight, reps: s.reps });
+                });
+            } else {
+                // If it's a brand new exercise, start with 3 clean empty set rows
+                setsBlueprint = [{ weight: "", reps: "" }, { weight: "", reps: "" }, { weight: "", reps: "" }];
+            }
+
+            appState.activeWorkout.exercises.push({
+                name: exerciseName,
+                sets: setsBlueprint
+            });
+            saveToLocalStorage();
+            closeAddExerciseModal();
+            renderActiveWorkoutView();
+        }
+
+        // CRITICAL SOLUTION FEATURE 2: FLEXIBLE SAVING & DROPPING EMPTY VALUES
+        function finishActiveWorkout() {
+            if (!appState.activeWorkout || appState.activeWorkout.exercises.length === 0) {
+                alert("Please add at least one exercise before completing.");
+                return;
+            }
+
+            const cleanLoggedExercises = [];
+
+            appState.activeWorkout.exercises.forEach(ex => {
+                const filledSets = [];
+                const pastSets = getLastPerformanceData(ex.name);
+
+                ex.sets.forEach((set, idx) => {
+                    let finalWeight = set.weight;
+                    let finalReps = set.reps;
+
+                    // GHOST AUTO-POPULATE RULE: If user left input box completely empty, check if we had ghost data to commit
+                    if (finalWeight === "" && pastSets && pastSets[idx]) finalWeight = pastSets[idx].weight;
+                    if (finalReps === "" && pastSets && pastSets[idx]) finalReps = pastSets[idx].reps;
+
+                    // FLEXIBLE VALIDATION CHECK: Only save data row if user has real metrics entered or adopted
+                    if (finalWeight !== "" && finalReps !== "" && finalWeight !== null && finalReps !== null) {
+                        filledSets.push({
+                            weight: parseFloat(finalWeight),
+                            reps: parseInt(finalReps)
+                        });
+                    }
+                });
+
+                // Drop the entire exercise cleanly if they skipped every single set entry box
+                if (filledSets.length > 0) {
+                    cleanLoggedExercises.push({
+                        name: ex.name,
+                        sets: filledSets
+                    });
+                }
+            });
+
+            if (cleanLoggedExercises.length === 0) {
+                alert("You didn't log any values. If you want to cancel, click 'Cancel Session'. You cannot save an entirely blank workout log.");
+                return;
+            }
+
+            // Read the dynamic text header title name
+            const explicitName = document.getElementById('active-workout-name').value || "Completed Workout";
+
+            // Push record payload block to history list
+            appState.history.push({
+                id: "log-" + Date.now(),
+                name: explicitName,
+                date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+                durationMins: Math.floor((Date.now() - appState.activeWorkout.startTime) / 60000),
+                exercises: cleanLoggedExercises
+            });
+
+            appState.activeWorkout = null;
+            saveToLocalStorage();
+            switchTab('history');
+        }
+
+        function cancelActiveWorkout() {
+            if (confirm("Are you sure you want to completely discard this workout tracking session? No history data will be saved.")) {
+                appState.activeWorkout = null;
+                saveToLocalStorage();
+                renderActiveWorkoutView();
+            }
+        }
+
+        // MODAL INTERFACE ROUTING HOOKS
+        function openAddExerciseModal() {
+            document.getElementById('exercise-modal').classList.remove('hidden');
+            renderModalExercises();
+        }
+
+        function closeAddExerciseModal() {
+            document.getElementById('exercise-modal').classList.add('hidden');
+            document.getElementById('modal-search').value = '';
+        }
+
+        function renderModalExercises() {
+            const container = document.getElementById('modal-list');
+            const term = document.getElementById('modal-search').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(term));
+            
+            filtered.forEach(e => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left py-3 px-4 bg-slate-800 border border-slate-700/60 text-slate-200 rounded-xl text-sm transition active:bg-indigo-600 active:text-white flex justify-between items-center mb-1.5";
+                btn.onclick = () => addExerciseToActive(e.name);
+                btn.innerHTML = `<span>${e.name}</span> <span class="text-xs text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full">${e.category}</span>`;
+                container.appendChild(btn);
+            });
+        }
+
+        // SCHEDULING INTERFACE CONTROLLER (TAB 1)
+        function renderScheduleView() {
+            const schedContainer = document.getElementById('today-scheduled-view');
+            const listContainer = document.getElementById('weekly-scheduler-list');
+            
+            // Resolve today's shorthand index name string
+            const daysMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const todayIndexStr = daysMap[new Date().getDay()];
+            const todayRoutineName = appState.schedule[todayIndexStr];
+
+            if (todayRoutineName && todayRoutineName.trim() !== "") {
+                schedContainer.innerHTML = `
+                    <div class="flex justify-between items-center py-2">
+                        <div>
+                            <p class="text-lg font-bold text-white">${todayRoutineName}</p>
+                            <p class="text-xs text-slate-400">Target routing planned for today (${todayIndexStr})</p>
+                        </div>
+                        <button onclick="startFreestyleWorkout('${todayRoutineName}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-lg transition">
+                            🚀 Start Now
+                        </button>
+                    </div>`;
+            } else {
+                schedContainer.innerHTML = `<p class="text-sm text-slate-400 py-1">No workout target set for today. Rest day or track unstructured training below.</p>`;
+            }
+
+            listContainer.innerHTML = '';
+            Object.keys(appState.schedule).forEach(day => {
+                const isToday = (day === todayIndexStr);
+                const row = document.createElement('div');
+                row.className = `flex items-center justify-between p-2 rounded-xl border ${isToday ? 'bg-indigo-950/20 border-indigo-500/40' : 'bg-slate-950 border-slate-800'}`;
+                
+                row.innerHTML = `
+                    <span class="w-12 font-bold text-sm ${isToday ? 'text-indigo-400' : 'text-slate-400'}">${day}${isToday ? ' 📍' : ''}</span>
+                    <input type="text" placeholder="Rest / Add Workout Title..." value="${appState.schedule[day]}" 
+                        onchange="updateScheduleDay('${day}', this.value)" 
+                        class="flex-1 min-w-0 mx-3 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+                `;
+                listContainer.appendChild(row);
+            });
+        }
+
+        function updateScheduleDay(day, value) {
+            appState.schedule[day] = value;
+            saveToLocalStorage();
+            renderScheduleView();
+        }
+
+        // CRITICAL SOLUTION FEATURE 3: UNLIMITED EXERCISE LIBRARY ENGINE (TAB 3)
+        function renderExerciseDictionary() {
+            const container = document.getElementById('dictionary-list');
+            const searchVal = document.getElementById('exercise-search').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = appState.exercises.filter(e => e.name.toLowerCase().includes(searchVal));
+
+            // Group outputs beautifully by programmatic movement category splits
+            const categories = [...new Set(filtered.map(e => e.category))].sort();
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-center py-6 text-xs text-slate-500">No exercises matched your search term.</p>`;
+                return;
+            }
+
+            categories.forEach(cat => {
+                const catBlock = document.createElement('div');
+                catBlock.className = "space-y-1.5 pt-2";
+                catBlock.innerHTML = `<h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 pl-1">${cat}</h4>`;
+                
+                filtered.filter(e => e.category === cat).forEach(e => {
+                    const el = document.createElement('div');
+                    el.className = "flex justify-between items-center bg-slate-950 px-3 py-2.5 rounded-xl border border-slate-800 text-sm";
+                    el.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <span class="font-medium text-slate-200">${e.name}</span>
+                            ${e.isCustom ? '<span class="text-[9px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.2 rounded border border-indigo-500/20">Custom</span>' : ''}
+                        </div>
+                        <button onclick="quickStartExercise('${e.name}')" class="text-xs text-indigo-400 font-medium bg-indigo-500/5 px-2.5 py-1 rounded-lg border border-indigo-500/10 hover:bg-indigo-500/20">
+                            Track
+                        </button>
+                    `;
+                    catBlock.appendChild(el);
+                });
+                container.appendChild(catBlock);
+            });
+        }
+
+        function addNewCustomExercise() {
+            const nameInput = document.getElementById('new-exercise-name');
+            const catSelect = document.getElementById('new-exercise-category');
+            const name = nameInput.value.trim();
+            const cat = catSelect.value;
+
+            if (!name) {
+                alert("Please provide an exercise name configuration descriptor.");
+                return;
+            }
+
+            // Validation against pre-existing items
+            if (appState.exercises.some(e => e.name.toLowerCase() === name.toLowerCase())) {
+                alert("An exercise configuration with that identical name already exists.");
+                return;
+            }
+
+            const newObj = {
+                id: "custom-" + Date.now(),
+                name: name,
+                category: cat,
+                isCustom: true
+            };
+
+            appState.exercises.push(newObj);
+            saveToLocalStorage();
+            
+            nameInput.value = '';
+            renderExerciseDictionary();
+            alert(`"${name}" successfully injected into live database library list.`);
+        }
+
+        function quickStartExercise(name) {
+            if (!appState.activeWorkout) {
+                startFreestyleWorkout(`Workout - ${name}`);
+            }
+            addExerciseToActive(name);
+            switchTab('workout');
+        }
+
+        // HISTORY VIEW LOADER ENGINE (TAB 4)
+        function renderHistoryLogView() {
+            const listContainer = document.getElementById('history-list');
+            const emptyLabel = document.getElementById('history-empty');
+            listContainer.innerHTML = '';
+
+            if (!appState.history || appState.history.length === 0) {
+                emptyLabel.classList.remove('hidden');
+                return;
+            }
+            emptyLabel.classList.add('hidden');
+
+            // Render array elements upside-down for chronological sorting layouts
+            for (let i = appState.history.length - 1; i >= 0; i--) {
+                const log = appState.history[i];
+                const block = document.createElement('div');
+                block.className = "bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative";
+                
+                let innerExercises = '';
+                log.exercises.forEach(ex => {
+                    let setTokens = ex.sets.map(s => `${s.weight}lbs x ${s.reps}`).join(', ');
+                    innerExercises += `
+                    <div class="text-xs text-slate-300">
+                        <span class="font-bold text-slate-400">${ex.name}:</span> 
+                        <span class="font-mono">${setTokens}</span>
+                    </div>`;
+                });
+
+                block.innerHTML = `
+                    <button onclick="deleteHistoryLog('${log.id}')" class="absolute top-3 right-3 text-slate-600 hover:text-rose-500 transition text-xs p-1">Delete</button>
+                    <div class="flex justify-between items-baseline border-b border-slate-900 pb-2">
+                        <div>
+                            <h4 class="font-bold text-white text-md">${log.name}</h4>
+                            <p class="text-[10px] text-slate-500">${log.date} • ⏱️ ${log.durationMins} mins</p>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">${innerExercises}</div>
+                `;
+                listContainer.appendChild(block);
+            }
+        }
+
+        function deleteHistoryLog(logId) {
+            if (confirm("Permanently erase this workout log calculation entry from history?")) {
+                appState.history = appState.history.filter(h => h.id !== logId);
+                saveToLocalStorage();
+                renderHistoryLogView();
+            }
+        }
+    </script>
+</body>
+</html>
